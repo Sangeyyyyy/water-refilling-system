@@ -23,8 +23,9 @@ RUN apt-get update && apt-get install -y \
 
 # Enable Apache mod_rewrite for Laravel routing
 RUN a2enmod rewrite
-RUN sed -i 's/^LoadModule mpm_worker_module/# LoadModule mpm_worker_module/' /etc/apache2/mods-enabled/*.conf
-RUN sed -i 's/^LoadModule mpm_event_module/# LoadModule mpm_event_module/' /etc/apache2/mods-enabled/*.conf
+
+# Fix: Properly handle MPM selection to avoid "More than one MPM loaded" error
+RUN a2dismod mpm_event mpm_worker || true && a2enmod mpm_prefork
 
 # Configure Apache document root to Laravel's public directory
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public

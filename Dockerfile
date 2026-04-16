@@ -23,6 +23,8 @@ RUN apt-get update && apt-get install -y \
 
 # Enable Apache mod_rewrite for Laravel routing
 RUN a2enmod rewrite
+RUN a2dismod mpm_prefork mpm_worker mpm_event 2>/dev/null || true
+RUN a2enmod mpm_prefork
 
 # Configure Apache document root to Laravel's public directory
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public

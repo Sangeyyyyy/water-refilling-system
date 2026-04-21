@@ -116,6 +116,9 @@ Route::get('/api/offices/{office}/ppmp-budget-codes', [OfficePpmpController::cla
 // Emergency Production Seeding Route - REMOVE AFTER USE
 Route::get('/force-seed-production-final-sync', function() {
     try {
+        set_time_limit(600); // 10 minutes
+        ini_set('memory_limit', '512M');
+        
         \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'OfficialDataSeeder', '--force' => true]);
         return "Seeding successful! <br><pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
     } catch (\Exception $e) {

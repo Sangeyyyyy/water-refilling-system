@@ -143,8 +143,6 @@ class OfficeHierarchySeeder extends Seeder
             foreach ($divisions as $division => $units) {
                 foreach ($units as $unit) {
                     Office::create([
-                        'campus' => $campus,
-                        'division' => $division,
                         'name' => $unit,
                         'building' => 'N/A' // To be updated if needed
                     ]);

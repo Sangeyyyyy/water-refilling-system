@@ -34,6 +34,10 @@ class OfficialDataSeeder extends Seeder
             $handle = fopen($path, 'r');
             $header = fgetcsv($handle); // Skip header
 
+            $offices = Office::all()->pluck('id', 'name')->toArray();
+            $clientData = [];
+            $batchSize = 100;
+
             while (($data = fgetcsv($handle)) !== false) {
                 // Basic validation: ensure email exists and is valid
                 if (empty($data[4]) || !str_contains($data[4], '@')) {
@@ -45,26 +49,34 @@ class OfficialDataSeeder extends Seeder
                 $email = trim($data[4]);
                 $officeName = trim($data[5]);
 
-                // Find or create office
-                $office = Office::where('name', $officeName)->first();
-                if (!$office && !empty($officeName)) {
-                    $office = Office::create([
-                        'name' => $officeName,
-                    ]);
+                // Find or create office with local cache
+                if (!empty($officeName) && !isset($offices[$officeName])) {
+                    $office = Office::create(['name' => $officeName]);
+                    $offices[$officeName] = $office->id;
                 }
 
-                Client::updateOrCreate(
-                    ['email' => $email],
-                    [
-                        'first_name' => $firstName,
-                        'last_name' => $lastName,
-                        'password' => Hash::make('Password123'), // Default secure password
-                        'office_id' => $office ? $office->id : null,
-                        'contact_number' => 'N/A',
-                        'gallon_count' => 0
-                    ]
-                );
+                $clientData[] = [
+                    'email' => $email,
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'password' => Hash::make('Password123'), // Default secure password
+                    'office_id' => $offices[$officeName] ?? null,
+                    'contact_number' => 'N/A',
+                    'gallon_count' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+
+                if (count($clientData) >= $batchSize) {
+                    Client::upsert($clientData, ['email'], ['first_name', 'last_name', 'office_id', 'updated_at']);
+                    $clientData = [];
+                }
             }
+            
+            if (!empty($clientData)) {
+                Client::upsert($clientData, ['email'], ['first_name', 'last_name', 'office_id', 'updated_at']);
+            }
+
             fclose($handle);
             $this->command->info("Imported users from {$filename}");
         }

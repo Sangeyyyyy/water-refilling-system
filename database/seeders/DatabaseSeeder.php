@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             OfficeHierarchySeeder::class,
             InventorySeeder::class,
             ClientSeeder::class,
+            OfficialDataSeeder::class,
         ]);
     }
 }

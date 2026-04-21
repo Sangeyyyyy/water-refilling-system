@@ -15,6 +15,9 @@ class OfficialDataSeeder extends Seeder
      */
     public function run(): void
     {
+        // Cleanup test clients
+        Client::whereIn('email', ['client@dnsc.edu.ph', 'customer@dnsc.edu.ph'])->delete();
+
         $files = [
             'BASD_HRIS_REQUEST-ACCOUNTING-OCP.csv',
             'Registrar-and-Technologies-Support-and-Services.csv'

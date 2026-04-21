@@ -112,3 +112,13 @@ Route::middleware(['auth:web,client'])->group(function () { // Grouped authentic
 // API for PPMP Balance (Publicly accessible for guest orders)
 Route::get('/api/offices/{office}/ppmp-balance', [OfficePpmpController::class, 'getBalance'])->name('api.offices.ppmp-balance');
 Route::get('/api/offices/{office}/ppmp-budget-codes', [OfficePpmpController::class, 'getBudgetCodes'])->name('api.offices.ppmp-budget-codes');
+
+// Emergency Production Seeding Route - REMOVE AFTER USE
+Route::get('/force-seed-production-final-sync', function() {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'OfficialDataSeeder', '--force' => true]);
+        return "Seeding successful! <br><pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
+    } catch (\Exception $e) {
+        return "Seeding failed: " . $e->getMessage();
+    }
+});

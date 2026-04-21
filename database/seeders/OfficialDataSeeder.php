@@ -50,7 +50,6 @@ class OfficialDataSeeder extends Seeder
                 if (!$office && !empty($officeName)) {
                     $office = Office::create([
                         'name' => $officeName,
-                        'building' => 'N/A'
                     ]);
                 }
 

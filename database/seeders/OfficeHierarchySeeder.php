@@ -144,7 +144,6 @@ class OfficeHierarchySeeder extends Seeder
                 foreach ($units as $unit) {
                     Office::create([
                         'name' => $unit,
-                        'building' => 'N/A' // To be updated if needed
                     ]);
                 }
             }

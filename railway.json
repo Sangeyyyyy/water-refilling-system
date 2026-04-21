@@ -7,6 +7,6 @@
         "healthcheckPath": "/login",
         "healthcheckTimeout": 300,
         "restartPolicyType": "ON_FAILURE",
-        "postDeployCommand": "php artisan db:seed --class=AdminUserSeeder --force && php artisan db:seed --class=OfficeHierarchySeeder --force"
+        "postDeployCommand": "php artisan migrate --force && php artisan db:seed --force"
     }
 }

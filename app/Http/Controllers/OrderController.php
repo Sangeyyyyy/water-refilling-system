@@ -16,11 +16,6 @@ class OrderController extends Controller
 {
     use LogsActivity, ManagesInventory;
 
-    public function __construct()
-    {
-        $this->middleware('auth:web,client');
-    }
-
     // Price per container is now managed in settings table
 
     public function create()

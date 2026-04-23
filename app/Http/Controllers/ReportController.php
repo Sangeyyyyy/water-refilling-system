@@ -82,11 +82,6 @@ class ReportController extends Controller
         return view('reports.batch_delivery_receipts', compact('groupedOrders'));
     }
 
-    public function financial(Request $request)
-    {
-        return redirect()->route('admin.reports.hub', ['tab' => 'financial'] + $request->all());
-    }
-
     public function printFinancial(Request $request)
     {
         $data = $this->getFinancialData($request);
@@ -190,11 +185,6 @@ class ReportController extends Controller
         ];
     }
 
-    public function operational(Request $request)
-    {
-        return redirect()->route('admin.reports.hub', ['tab' => 'operational'] + $request->all());
-    }
-
     private function getOperationalData(Request $request)
     {
         $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : Carbon::now()->startOfMonth();
@@ -266,11 +256,6 @@ class ReportController extends Controller
         ];
     }
 
-    public function inventory()
-    {
-        return redirect()->route('admin.reports.hub', ['tab' => 'inventory']);
-    }
-
     private function getInventoryData()
     {
         $items = \App\Models\Inventory::all();
@@ -312,11 +297,6 @@ class ReportController extends Controller
             'stockData' => $stockData,
             'circulationData' => $circulationData
         ];
-    }
-
-    public function index(Request $request)
-    {
-        return $this->hub($request);
     }
 
     private function getAdminStats()

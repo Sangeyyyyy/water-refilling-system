@@ -17,18 +17,52 @@
         </div>
         <!-- Indicators -->
         <div class="carousel-indicators">
-            <button type="button" data-bs-target="#heroSlideshow" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-            <button type="button" data-bs-target="#heroSlideshow" data-bs-slide-to="1" aria-label="Slide 2"></button>
-            <button type="button" data-bs-target="#heroSlideshow" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            <button type="button" data-bs-target="#heroSlideshow" data-bs-slide-to="0" class="active" aria-current="true" aria-label="View Banner Slide"></button>
+            <button type="button" data-bs-target="#heroSlideshow" data-bs-slide-to="1" aria-label="View Slide 2"></button>
+            <button type="button" data-bs-target="#heroSlideshow" data-bs-slide-to="2" aria-label="View Slide 3"></button>
         </div>
     </div>
-
 </div>
 
-<div id="services" class="container py-5">
+<!-- Stats Section -->
+<div class="bg-accent text-white py-4 shadow-sm position-relative" style="z-index: 10;">
+    <div class="container">
+        <div class="row text-center align-items-center g-3">
+            <div class="col-md-4">
+                <div class="d-flex align-items-center justify-content-center">
+                    <i class="bi bi-building fs-2 me-3 text-white opacity-75"></i>
+                    <div class="text-start">
+                        <h4 class="fw-bold mb-0 text-white">50+</h4>
+                        <small class="text-white opacity-75">Offices Served</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex align-items-center justify-content-center border-start border-end border-light border-opacity-25 animate-fade-in" style="animation-delay: 0.2s;">
+                    <i class="bi bi-droplet-half fs-2 me-3 text-white opacity-75"></i>
+                    <div class="text-start">
+                        <h4 class="fw-bold mb-0 text-white">100%</h4>
+                        <small class="text-white opacity-75">Certified Pure</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex align-items-center justify-content-center animate-fade-in" style="animation-delay: 0.4s;">
+                    <i class="bi bi-truck fs-2 me-3 text-white opacity-75"></i>
+                    <div class="text-start">
+                        <h4 class="fw-bold mb-0 text-white">Always</h4>
+                        <small class="text-white opacity-75">On-Time Delivery</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="services" class="container py-5 mt-4">
     <div class="row g-4">
         <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm p-4 text-center hover-lift">
+            <div class="card h-100 border-0 shadow-sm p-4 text-center hover-lift animate-fade-in">
                 <div class="feature-icon mb-3">
                     <i class="bi bi-clock-history fs-1 text-primary"></i>
                 </div>
@@ -37,7 +71,7 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm p-4 text-center hover-lift">
+            <div class="card h-100 border-0 shadow-sm p-4 text-center hover-lift animate-fade-in" style="animation-delay: 0.1s;">
                 <div class="feature-icon mb-3">
                     <i class="bi bi-droplet fs-1 text-primary"></i>
                 </div>
@@ -46,7 +80,7 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm p-4 text-center hover-lift">
+            <div class="card h-100 border-0 shadow-sm p-4 text-center hover-lift animate-fade-in" style="animation-delay: 0.2s;">
                 <div class="feature-icon mb-3">
                     <i class="bi bi-clipboard-check fs-1 text-primary"></i>
                 </div>
@@ -57,53 +91,7 @@
     </div>
 </div>
 
-<div class="bg-white py-5 border-top border-bottom">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="fw-bold text-accent">Vision, Mission & Core Values</h2>
-            <div class="mx-auto bg-accent rounded-pill mb-3" style="width: 60px; height: 4px;"></div>
-        </div>
-        <div class="row g-4 justify-content-center">
-            <!-- Vision -->
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm p-4 text-center hover-lift">
-                    <div class="feature-icon mb-3">
-                        <i class="bi bi-eye fs-1 text-accent"></i>
-                    </div>
-                    <h3 class="fw-bold text-accent">Vision</h3>
-                    <p class="text-muted">An Institution Leading in Agri-Fisheries and Socio-Cultural Development in the ASEAN Region</p>
-                </div>
-            </div>
-            <!-- Mission -->
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm p-4 text-center hover-lift">
-                    <div class="feature-icon mb-3">
-                        <i class="bi bi-bullseye fs-1 text-accent"></i>
-                    </div>
-                    <h3 class="fw-bold text-accent">Mission</h3>
-                    <p class="text-muted"><span class="text-dnsc-green">DNSC</span> shall produce future-ready workforce, create innovative solutions and technologies, empower communities, and uphold good governance towards sustainable development.</p>
-                </div>
-            </div>
-            <!-- Core Values -->
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm p-4 text-center hover-lift">
-                    <div class="feature-icon mb-3">
-                        <i class="bi bi-flag fs-1 text-accent"></i>
-                    </div>
-                    <h3 class="fw-bold text-accent">Core Values</h3>
-                    <ul class="list-unstyled text-muted mb-0 small text-start d-inline-block">
-                        <li class="mb-1"><i class="bi bi-check2-circle text-accent me-2"></i>Stewardship</li>
-                        <li class="mb-1"><i class="bi bi-check2-circle text-accent me-2"></i>Adaptability and Excellence</li>
-                        <li class="mb-1"><i class="bi bi-check2-circle text-accent me-2"></i>Integrity and Innovativeness</li>
-                        <li><i class="bi bi-check2-circle text-accent me-2"></i>Love of God and Country</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="py-5 bg-white border-top">
+<div class="py-5 bg-white border-top border-bottom">
     <div class="container">
         <div class="row align-items-center g-5">
             <div class="col-lg-6">
@@ -181,8 +169,104 @@
 </div>
 
 <div class="bg-light py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-accent">Vision, Mission & Core Values</h2>
+            <div class="mx-auto bg-accent rounded-pill mb-3" style="width: 60px; height: 4px;"></div>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <!-- Vision -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm p-4 text-center hover-lift">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-eye fs-1 text-accent"></i>
+                    </div>
+                    <h3 class="fw-bold text-accent">Vision</h3>
+                    <p class="text-muted">An Institution Leading in Agri-Fisheries and Socio-Cultural Development in the ASEAN Region</p>
+                </div>
+            </div>
+            <!-- Mission -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm p-4 text-center hover-lift">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-bullseye fs-1 text-accent"></i>
+                    </div>
+                    <h3 class="fw-bold text-accent">Mission</h3>
+                    <p class="text-muted"><span class="text-dnsc-green">DNSC</span> shall produce future-ready workforce, create innovative solutions and technologies, empower communities, and uphold good governance towards sustainable development.</p>
+                </div>
+            </div>
+            <!-- Core Values -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm p-4 text-center hover-lift">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-flag fs-1 text-accent"></i>
+                    </div>
+                    <h3 class="fw-bold text-accent">Core Values</h3>
+                    <ul class="list-unstyled text-muted mb-0 small text-start d-inline-block">
+                        <li class="mb-1"><i class="bi bi-check2-circle text-accent me-2"></i>Stewardship</li>
+                        <li class="mb-1"><i class="bi bi-check2-circle text-accent me-2"></i>Adaptability and Excellence</li>
+                        <li class="mb-1"><i class="bi bi-check2-circle text-accent me-2"></i>Integrity and Innovativeness</li>
+                        <li><i class="bi bi-check2-circle text-accent me-2"></i>Love of God and Country</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FAQ Section -->
+<div class="container py-5 border-bottom">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-accent">Frequently Asked Questions</h2>
+        <div class="mx-auto bg-accent rounded-pill mb-3" style="width: 60px; height: 4px;"></div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="accordion accordion-flush glass-card" id="faqAccordion">
+                <div class="accordion-item bg-transparent">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed bg-transparent fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                            How does PPMP deduction work?
+                        </button>
+                    </h2>
+                    <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body text-muted">
+                            When you order on behalf of a DNSC office or unit, the cost of the water refill is automatically logged against your allocated PPMP budget code. Simply ensure your budget code is correctly selected during checkout.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item bg-transparent">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed bg-transparent fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                            What are the standard delivery schedules?
+                        </button>
+                    </h2>
+                    <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body text-muted">
+                            Deliveries are typically routed directly to offices within the campus every {{ $deliveryDaysStr ?? 'Tuesday and Friday' }}. Your order dashboard will show you the exact delivery slots available.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item bg-transparent border-0">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed bg-transparent fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                            Can I walk in to purchase water?
+                        </button>
+                    </h2>
+                    <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body text-muted">
+                            Yes, walk-in orders are supported at the main refilling station. Our staff will assist you in logging the transaction in the system.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white py-4 border-top">
     <div class="container text-center">
-        <h2 class="mb-4">Internal Access Only</h2>
+        <h2 class="mb-3 h4">Internal Access Only</h2>
         <p class="text-muted mb-0">This portal is specifically for <span class="text-dnsc-green">DNSC</span> offices, units, and personnel. Ensure your PPMP is updated for seamless transactions.</p>
     </div>
 </div>

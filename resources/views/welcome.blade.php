@@ -91,10 +91,10 @@
     </div>
 </div>
 
-<div class="py-5 bg-white border-top border-bottom">
+<div class="py-5 py-lg-5 bg-white border-top border-bottom" style="padding: 6rem 0 !important;">
     <div class="container">
         <div class="row align-items-center g-5">
-            <div class="col-lg-6">
+            <div class="col-lg-5">
                 <h2 class="h1 fw-bold text-accent mb-4">Exclusive Institutional Rate</h2>
                 <p class="lead text-muted mb-4">We provide high-quality, multi-filtered drinking water at special rates for <span class="text-dnsc-green">DNSC</span> offices and units.</p>
                 
@@ -146,7 +146,7 @@
                 </div>
             </div>
             
-            <div class="col-lg-5 offset-lg-1 col-12 mt-4 mt-lg-0">
+            <div class="col-lg-5 offset-lg-2 col-12 mt-4 mt-lg-0">
                 <div class="institutional-card p-4 p-md-5 shadow-lg text-center animate-fade-in">
                     <span class="badge bg-white text-accent rounded-pill px-3 py-2 mb-4 fw-bold">BEST VALUE</span>
                     <div class="pricing-value">₱{{ isset($unitPrice) ? number_format($unitPrice, 0) : '25' }}</div>

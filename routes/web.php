@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\DashboardController;
@@ -114,83 +113,3 @@ Route::middleware(['auth:web,client'])->group(function () { // Grouped authentic
 Route::get('/api/offices/{office}/ppmp-balance', [OfficePpmpController::class, 'getBalance'])->name('api.offices.ppmp-balance');
 Route::get('/api/offices/{office}/ppmp-budget-codes', [OfficePpmpController::class, 'getBudgetCodes'])->name('api.offices.ppmp-budget-codes');
 
-// TEMPORARY: Fast emergency route to seed org hierarchy - REMOVE AFTER USE
-Route::get('/run-hierarchy-seeder-9x7k2p', function () {
-    try {
-        $now = now();
-
-        // 1. Insert campuses
-        $campusNames = [
-            'MAIN CAMPUS',
-            'DNSC–IGACOS CAMPUS',
-            'DNSC–CARMEN CAMPUS',
-            'DNSC–STO. TOMAS CAMPUS',
-            'DNSC–TALAINGOD CAMPUS',
-        ];
-        foreach ($campusNames as $name) {
-            \App\Models\Campus::firstOrCreate(['name' => $name]);
-        }
-        $campuses = \App\Models\Campus::pluck('id', 'name');
-
-        // 2. Define college offices and their units
-        $hierarchy = [
-            'MAIN CAMPUS' => [
-                'OFFICE OF THE PRESIDENT' => ['Presidential Affairs Division','Records Management Unit','Gender and Development Unit','Alumni Affairs Unit','Motor Pool Services Unit','Board Secretary','Internal Audit Services Unit','Public Information Unit','Research Ethics Committee'],
-                'OFFICE OF THE VICE PRESIDENT FOR ACADEMIC AFFAIRS' => ['Quality Assurance Division','Compliance and Standardization Unit','Accreditation and Assessment Unit','Linkages Unit','Mobility Unit','Curriculum and Instruction Division','Scholarship and Grants Unit','Career and Job Placement Unit','Dormitory Services Unit','Sports Unit','Student Organizations Unit','Guidance, Counselling, and Testing Unit','Planning, Monitoring, and Evaluation Unit'],
-                'OFFICE OF THE VICE PRESIDENT FOR ADMINISTRATION AND FINANCE' => ['Information and Communication Technology Services Division','Systems Development Unit','ICT Infrastructure Management Unit','Technical Support Services Unit','Finance Services Division','Accounting Services Unit','Budgeting Services Unit','Cashiering Services Unit','Procurement Services Unit','Supply and Property Management Unit','General Services Unit','Security Services Unit','Health Services Unit','Human Resource Management Division','Payroll and Benefits Unit','Legal Services Unit','Data Privacy Unit'],
-                'OFFICE OF THE VICE PRESIDENT FOR RESEARCH, DEVELOPMENT, AND EXTENSION' => ['Research Division','Research Publication Unit','Extension Division','Community Affairs Unit','Knowledge and Technology Transfer Division','Technology Transfer Unit','Technology Business Incubation Unit','Marine Biodiversity Research and Conservation Center','Mindanao Food Innovation Center','Halal Industry Research and Training Center','Disaster Risk Reduction and Management Operation Center'],
-                'OTHER ACADEMIC AND SUPPORT DIVISIONS (MAIN CAMPUS)' => ['Records and Admission Division','Student Admission Services Unit','Learning Resource Division','IT and Multimedia Resource Unit','National Service Training Program Division','Civic Welfare Training Service (CWTS) Unit','Reserve Officers Training Corps (ROTC) Unit','Literacy Training Service (LTS) Unit','Adult Education Unit'],
-            ],
-            'DNSC–IGACOS CAMPUS' => [
-                'Administration and Finance Services Units' => ['General Administrative Unit'],
-                'Academic and Student Affairs Units' => ['General Academic Unit'],
-                'Research, Development, and Extension Units' => ['General Research Unit'],
-            ],
-            'DNSC–CARMEN CAMPUS' => [
-                'Administration and Finance Services Units' => ['General Administrative Unit'],
-                'Academic and Student Affairs Units' => ['General Academic Unit'],
-                'Research, Development, and Extension Units' => ['General Research Unit'],
-            ],
-            'DNSC–STO. TOMAS CAMPUS' => [
-                'Administration and Finance Services Units' => ['General Administrative Unit'],
-                'Academic and Student Affairs Units' => ['General Academic Unit'],
-                'Research, Development, and Extension Units' => ['General Research Unit'],
-            ],
-            'DNSC–TALAINGOD CAMPUS' => [
-                'Administration and Finance Services Units' => ['General Administrative Unit'],
-                'Academic and Student Affairs Units' => ['General Academic Unit'],
-                'Research, Development, and Extension Units' => ['General Research Unit'],
-            ],
-        ];
-
-        foreach ($hierarchy as $campusName => $collegeOfficesData) {
-            $campusId = $campuses[$campusName] ?? null;
-            if (!$campusId) continue;
-
-            foreach ($collegeOfficesData as $coName => $units) {
-                $co = \App\Models\CollegeOffice::firstOrCreate(['campus_id' => $campusId, 'name' => $coName]);
-                $div = \App\Models\Division::firstOrCreate(['campus_id' => $campusId, 'college_office_id' => $co->id, 'name' => $coName . ' Division']);
-
-                foreach ($units as $unitName) {
-                    $office = \App\Models\Office::firstOrCreate(['name' => $unitName]);
-                    if (empty($office->division_id)) {
-                        $office->division_id = $div->id;
-                        $office->save();
-                    }
-                }
-            }
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'counts' => [
-                'campuses' => \App\Models\Campus::count(),
-                'college_offices' => \App\Models\CollegeOffice::count(),
-                'divisions' => \App\Models\Division::count(),
-                'offices' => \App\Models\Office::count(),
-            ]
-        ]);
-    } catch (\Exception $e) {
-        return response()->json(['status' => 'error', 'message' => $e->getMessage(), 'trace' => $e->getTraceAsString()], 500);
-    }
-});

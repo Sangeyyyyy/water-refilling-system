@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Office;
-use Illuminate\Support\Facades\DB;
 
 class OfficeHierarchySeeder extends Seeder
 {

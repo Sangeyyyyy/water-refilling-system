@@ -935,36 +935,29 @@
     }
 
     function showReviewModal() {
-        console.log('--- Order Review Modal Initiation ---');
         try {
             const form = document.getElementById('orderForm');
             if (!form) throw new Error('Order form not found');
             
             // Trigger native validation
-            console.log('Triggering form validation...');
             if (!form.checkValidity()) {
-                console.warn('Form validation failed');
                 form.reportValidity();
                 
                 const requiredFields = form.querySelectorAll('[required]');
                 requiredFields.forEach(field => {
                     if (!field.value.trim()) {
-                        console.log('Missing field:', field.id || field.name);
                         field.classList.add('is-invalid');
                     }
                 });
                 return;
             }
-            console.log('Form validation passed');
 
             // 1. Basic Info
-            console.log('Populating basic info...');
             const firstNameEl = document.getElementById('first_name');
             const lastNameEl = document.getElementById('last_name');
             const contactEl = document.getElementById('contact_number');
             
             if (!firstNameEl || !lastNameEl || !contactEl) {
-                console.error('Identity elements missing:', { firstNameEl, lastNameEl, contactEl });
                 throw new Error('Identity fields (Name/Contact) missing from page.');
             }
 
@@ -972,7 +965,6 @@
             document.getElementById('modal_contact').innerText = contactEl.value;
             
             // 2. Quantity & Total
-            console.log('Handling quantity and total...');
             const qtyEl = document.getElementById('quantity');
             const totalDisplayEl = document.getElementById('total_display');
             if (!qtyEl || !totalDisplayEl) throw new Error('Quantity or Total display missing');
@@ -980,8 +972,8 @@
             const qty = qtyEl.value;
             document.getElementById('modal_quantity').innerText = `${qty} ${qty > 1 ? 'Gallons' : 'Gallon'}`;
             document.getElementById('modal_total_amount').innerText = totalDisplayEl.innerText;
+
             // 3. Location Handling
-            console.log('Handling location details...');
             const typeOfficeEl = document.getElementById('type_office');
             const isOffice = typeOfficeEl ? typeOfficeEl.checked : false;
             const modalLocation = document.getElementById('modal_location');
@@ -989,7 +981,6 @@
             const budgetCodeVal = document.getElementById('budget_code_hidden').value;
 
             if (isOffice) {
-                console.log('Processing office-based location...');
                 const campusVal = document.getElementById('select_campus')?.value || 'N/A';
                 const divisionVal = document.getElementById('select_division')?.value || 'N/A';
                 
@@ -1014,7 +1005,6 @@
                     document.getElementById('modal_budget_code').innerText = budgetCodeVal || '---';
                 }
             } else {
-                console.log('Processing individual/manual location...');
                 const locGuestEl = document.getElementById('other_location_guest');
                 const locAuthEl = document.getElementById('other_location_auth');
                 const locVal = (locGuestEl && locGuestEl.offsetParent !== null) ? locGuestEl.value : 
@@ -1025,7 +1015,6 @@
             }
 
             // 4. Schedule
-            console.log('Handling schedule...');
             const drDateEl = document.getElementById('delivery_date');
             if (drDateEl) {
                 const dateObj = new Date(drDateEl.value);
@@ -1037,7 +1026,6 @@
             }
 
             // 5. Refill Status
-            console.log('Handling refill/cap status...');
             const refillEl = document.getElementById('is_refill');
             const capsNoEl = document.getElementById('caps_no');
             const missingCapsEl = document.getElementById('missing_caps_count');
@@ -1067,22 +1055,18 @@
             }
 
             // 6. Show Modal via Bootstrap
-            console.log('Finalizing: Opening Bootstrap Modal...');
             const modalElement = document.getElementById('reviewOrderModal');
             if (!modalElement) throw new Error('Modal element "reviewOrderModal" not found');
             
             const bs = window.bootstrap || (typeof bootstrap !== 'undefined' ? bootstrap : null);
             if (!bs || !bs.Modal) {
-                console.error('Bootstrap Object Detection:', { 'window.bootstrap': !!window.bootstrap, 'bootstrap': typeof bootstrap });
                 throw new Error('Bootstrap Modal system is not initialized.');
             }
 
             const reviewModal = new bs.Modal(modalElement);
             reviewModal.show();
-            console.log('Modal show command executed.');
 
         } catch (error) {
-            console.error('CRITICAL ERROR in showReviewModal:', error);
             alert('CRITICAL ERROR: ' + error.message + '\nPlease check console for technical details.');
         }
     }

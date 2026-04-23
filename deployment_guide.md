@@ -14,7 +14,6 @@ This guide provides step-by-step instructions to deploy your Laravel-based Water
 
 Ensure your project contains the following files (already added):
 - `Procfile`: Tells Railway how to run the web server.
-- `nixpacks.toml`: Customizes the build process (Vite build, PHP optimization).
 
 **Push your latest changes to GitHub:**
 ```bash

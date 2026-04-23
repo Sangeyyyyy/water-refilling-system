@@ -112,23 +112,3 @@ Route::middleware(['auth:web,client'])->group(function () { // Grouped authentic
 // API for PPMP Balance (Publicly accessible for guest orders)
 Route::get('/api/offices/{office}/ppmp-balance', [OfficePpmpController::class, 'getBalance'])->name('api.offices.ppmp-balance');
 Route::get('/api/offices/{office}/ppmp-budget-codes', [OfficePpmpController::class, 'getBudgetCodes'])->name('api.offices.ppmp-budget-codes');
-
-// Verification Route
-Route::get('/check-client-count-final-verification', function() {
-    return "Total Employees in Database: " . \App\Models\Client::count();
-});
-
-// Emergency Production Seeding Route - REMOVE AFTER USE
-
-// Emergency Production Seeding Route - REMOVE AFTER USE
-Route::get('/force-seed-production-final-sync', function() {
-    try {
-        set_time_limit(600); // 10 minutes
-        ini_set('memory_limit', '512M');
-        
-        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'OfficialDataSeeder', '--force' => true]);
-        return "Seeding successful! <br><pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
-    } catch (\Exception $e) {
-        return "Seeding failed: " . $e->getMessage();
-    }
-});

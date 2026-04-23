@@ -70,6 +70,7 @@
 
         setTheme(getPreferredTheme())
     </script>
+    @stack('styles')
 </head>
 <body>
     @php

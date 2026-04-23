@@ -86,6 +86,7 @@
     </script>
 
     <!-- Styles moved to custom.css -->
+    @stack('styles')
 </head>
 <body>
     <!-- Skeleton Loading Overlay -->

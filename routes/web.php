@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\DashboardController;
@@ -112,3 +113,22 @@ Route::middleware(['auth:web,client'])->group(function () { // Grouped authentic
 // API for PPMP Balance (Publicly accessible for guest orders)
 Route::get('/api/offices/{office}/ppmp-balance', [OfficePpmpController::class, 'getBalance'])->name('api.offices.ppmp-balance');
 Route::get('/api/offices/{office}/ppmp-budget-codes', [OfficePpmpController::class, 'getBudgetCodes'])->name('api.offices.ppmp-budget-codes');
+
+// TEMPORARY: Emergency route to seed org hierarchy in production - REMOVE AFTER USE
+Route::get('/run-hierarchy-seeder-9x7k2p', function () {
+    try {
+        Artisan::call('db:seed', ['--class' => 'OfficeHierarchySeeder', '--force' => true]);
+        $output = Artisan::output();
+        $campuses = \App\Models\Campus::count();
+        $collegeOffices = \App\Models\CollegeOffice::count();
+        $divisions = \App\Models\Division::count();
+        $offices = \App\Models\Office::count();
+        return response()->json([
+            'status' => 'success',
+            'output' => $output,
+            'counts' => compact('campuses', 'collegeOffices', 'divisions', 'offices')
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+    }
+});

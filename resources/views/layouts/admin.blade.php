@@ -475,6 +475,7 @@
             }, 5000);
         });
     </script>
+    @stack('scripts')
     <script>
         // ===== SKELETON LOADING =====
         const skeleton = document.getElementById('page-skeleton');

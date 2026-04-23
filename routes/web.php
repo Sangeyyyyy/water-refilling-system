@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WalkInOrderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
@@ -48,6 +49,8 @@ Auth::routes(['register' => true]);
 
 Route::middleware(['auth:web,client'])->group(function () { // Grouped authenticated routes
     Route::get('/home', [DashboardController::class, 'index'])->name('home');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
     Route::get('/admin/history', [AdminOrderController::class, 'history'])->middleware('role:admin,director,manager,staff')->name('admin.history');
     Route::put('/admin/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.status');
     Route::put('/admin/orders/batch-status', [AdminOrderController::class, 'batchUpdateStatus'])->name('admin.orders.batch-status');

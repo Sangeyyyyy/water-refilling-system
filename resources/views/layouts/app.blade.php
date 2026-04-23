@@ -169,6 +169,9 @@
                                     </a>
                                 @endif
 
+                                <a class="dropdown-item rounded-3 py-2" href="{{ route('profile.edit') }}">
+                                    <i class="bi bi-person-gear me-2 text-primary"></i>Profile Settings
+                                </a>
                                 <a class="dropdown-item rounded-3 py-2" href="{{ route('home') }}">
                                     <i class="bi bi-list-task me-2 text-primary"></i>My Orders
                                 </a>

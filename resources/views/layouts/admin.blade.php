@@ -256,6 +256,11 @@
                                             </div>
                                         </a>
                                     </li>
+                                    <li>
+                                        <a class="dropdown-item rounded-3 py-2" href="{{ route('profile.edit') }}">
+                                            <i class="bi bi-person-gear me-2 text-primary"></i>Profile Settings
+                                        </a>
+                                    </li>
                                     <li><hr class="dropdown-divider mx-2"></li>
                                     <li>
                                         <a class="dropdown-item rounded-3 py-2 text-danger" href="{{ route('logout') }}"
@@ -332,6 +337,9 @@
                                                 <i class="bi bi-moon-stars-fill theme-icon-dark me-2 text-primary d-none"></i>
                                                 <span class="theme-text">Dark Mode</span>
                                             </div>
+                                        </a>
+                                        <a class="dropdown-item rounded-3 py-2" href="{{ route('profile.edit') }}">
+                                            <i class="bi bi-person-gear me-2 text-primary"></i>Profile Settings
                                         </a>
                                         <div class="dropdown-divider mx-2"></div>
                                         <a class="dropdown-item rounded-3 py-2 text-danger" href="{{ route('logout') }}"

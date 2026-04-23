@@ -10,11 +10,6 @@ class OfficeHierarchySeeder extends Seeder
 {
     public function run(): void
     {
-        // Clear existing offices
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        Office::truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-
         $data = [
             'MAIN CAMPUS' => [
                 'OFFICE OF THE PRESIDENT' => [
@@ -139,12 +134,35 @@ class OfficeHierarchySeeder extends Seeder
             ]
         ];
 
-        foreach ($data as $campus => $divisions) {
-            foreach ($divisions as $division => $units) {
-                foreach ($units as $unit) {
-                    Office::create([
-                        'name' => $unit,
+        foreach ($data as $campusName => $collegeOfficesData) {
+            $campus = \App\Models\Campus::firstOrCreate(['name' => $campusName]);
+
+            foreach ($collegeOfficesData as $collegeOfficeName => $unitsList) {
+                // Determine if it should be a Division (top level structure has a direct division layer?)
+                // Since our hierarchy is Campus -> CollegeOffice -> Division -> Office.
+                // We map $collegeOfficeName to CollegeOffice, but also create a default Division underneath it.
+                $collegeOffice = \App\Models\CollegeOffice::firstOrCreate([
+                    'campus_id' => $campus->id,
+                    'name' => $collegeOfficeName
+                ]);
+
+                // Create a "Core" or standard Division grouping for these units
+                $division = \App\Models\Division::firstOrCreate([
+                    'campus_id' => $campus->id,
+                    'college_office_id' => $collegeOffice->id,
+                    'name' => $collegeOfficeName . ' - Core Division'
+                ]);
+
+                foreach ($unitsList as $unitName) {
+                    $office = Office::firstOrCreate([
+                        'name' => $unitName,
                     ]);
+
+                    // Assign division if empty, do not override if already assigned to a different custom one
+                    if (empty($office->division_id)) {
+                        $office->division_id = $division->id;
+                        $office->save();
+                    }
                 }
             }
         }

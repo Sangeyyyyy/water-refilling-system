@@ -70,7 +70,9 @@ class DashboardController extends Controller
             'today_orders' => (clone $baseQuery)->whereDate('created_at', Carbon::today())->count(),
         ];
         
-        $offices = Office::with('division.campus')->orderBy('name')->get();
+        $offices = \Illuminate\Support\Facades\Cache::remember('offices_for_order', 3600, fn() =>
+            Office::with('division.campus')->orderBy('name')->get()
+        );
         $unitPrice = Setting::getUnitPrice();
         
         return view('home', compact('orders', 'activeOrders', 'stats', 'offices', 'unitPrice'));
@@ -135,7 +137,9 @@ class DashboardController extends Controller
             $orders = $query->orderBy('created_at', $sort)->paginate(10)->withQueryString();
         }
         
-        $offices = Office::with('division.campus')->orderBy('name')->get();
+        $offices = \Illuminate\Support\Facades\Cache::remember('offices_for_order', 3600, fn() =>
+            Office::with('division.campus')->orderBy('name')->get()
+        );
 
         $dashboardData = [];
         if (in_array($user->role, config('roles.management_roles'))) {

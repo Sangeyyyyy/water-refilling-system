@@ -20,6 +20,45 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
 
+    <style>
+        /* ===== SKELETON LOADING ===== */
+        #page-skeleton {
+            position: fixed; inset: 0; z-index: 9999;
+            background: var(--bs-body-bg, #fff);
+            display: none;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+        #page-skeleton.visible { display: flex !important; opacity: 1; }
+        .sk-sidebar {
+            width: 250px; height: 100vh; flex-shrink: 0;
+            border-right: 1px solid rgba(0,0,0,.1);
+            padding: 1.25rem;
+            display: flex; flex-direction: column; gap: 0.75rem;
+        }
+        .sk-main { flex: 1; display: flex; flex-direction: column; }
+        .sk-topbar {
+            height: 60px; border-bottom: 1px solid rgba(0,0,0,.1);
+            display: flex; align-items: center; padding: 0 1.5rem; gap: 1rem;
+        }
+        .sk-content { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+        .sk-block {
+            border-radius: 8px;
+            background: linear-gradient(90deg, #e8e8e8 25%, #f8f8f8 50%, #e8e8e8 75%);
+            background-size: 400% 100%;
+            animation: sk-shimmer 1.4s ease infinite;
+        }
+        [data-bs-theme="dark"] .sk-block {
+            background: linear-gradient(90deg, #2a2a2a 25%, #383838 50%, #2a2a2a 75%);
+            background-size: 400% 100%;
+        }
+        [data-bs-theme="dark"] #page-skeleton { background: #1a1a2e; }
+        @keyframes sk-shimmer {
+            0%   { background-position: 100% 50%; }
+            100% { background-position: -100% 50%; }
+        }
+    </style>
+
     <script>
         // Check local storage
         const getPreferredTheme = () => {
@@ -49,6 +88,52 @@
     <!-- Styles moved to custom.css -->
 </head>
 <body>
+    <!-- Skeleton Loading Overlay -->
+    <div id="page-skeleton">
+        @if(auth()->check() && in_array(auth()->user()->role, ['admin','director','manager','staff']))
+        <!-- Admin skeleton: sidebar + topbar + content -->
+        <div class="sk-sidebar d-none d-lg-flex">
+            <div class="sk-block" style="height:48px;width:80%;"></div>
+            <div class="sk-block" style="height:12px;width:40%;margin-top:1rem;"></div>
+            @for($i=0;$i<6;$i++)
+            <div class="sk-block" style="height:38px;border-radius:10px;"></div>
+            @endfor
+        </div>
+        <div class="sk-main">
+            <div class="sk-topbar">
+                <div class="sk-block" style="width:28px;height:28px;border-radius:6px;"></div>
+                <div class="sk-block" style="width:160px;height:16px;"></div>
+                <div class="sk-block ms-auto" style="width:38px;height:38px;border-radius:50%;"></div>
+            </div>
+            <div class="sk-content">
+                <div class="sk-block" style="height:28px;width:40%;"></div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;">
+                    @for($i=0;$i<4;$i++)
+                    <div class="sk-block" style="height:100px;border-radius:12px;"></div>
+                    @endfor
+                </div>
+                @for($i=0;$i<5;$i++)
+                <div class="sk-block" style="height:44px;"></div>
+                @endfor
+            </div>
+        </div>
+        @else
+        <!-- User navbar skeleton -->
+        <div style="width:100%;">
+            <div class="sk-topbar" style="height:64px;border-bottom:1px solid rgba(0,0,0,.1);">
+                <div class="sk-block" style="width:44px;height:44px;border-radius:50%;"></div>
+                <div class="sk-block" style="width:200px;height:20px;"></div>
+                <div class="sk-block ms-auto" style="width:100px;height:36px;border-radius:20px;"></div>
+            </div>
+            <div class="sk-content">
+                <div class="sk-block" style="height:32px;width:30%;"></div>
+                @for($i=0;$i<6;$i++)
+                <div class="sk-block" style="height:48px;"></div>
+                @endfor
+            </div>
+        </div>
+        @endif
+    </div>
     <div id="app">
         @if(auth()->check() && in_array(auth()->user()->role, ['admin', 'director', 'manager', 'staff']))
             <!-- Sidebar Overlay for Mobile -->
@@ -389,6 +474,34 @@
             }, 5000);
         });
     </script>
-    @stack('scripts')
+    <script>
+        // ===== SKELETON LOADING =====
+        const skeleton = document.getElementById('page-skeleton');
+        function showSkeleton() {
+            if (skeleton) {
+                skeleton.style.display = 'flex';
+                requestAnimationFrame(() => skeleton.classList.add('visible'));
+            }
+        }
+        // Show on any internal link click
+        document.addEventListener('click', function(e) {
+            const a = e.target.closest('a[href]');
+            if (!a) return;
+            const href = a.getAttribute('href');
+            if (!href || href.startsWith('#') || href.startsWith('javascript') || a.target === '_blank' || e.ctrlKey || e.metaKey) return;
+            // Skip logout and download links
+            if (a.closest('form') || a.classList.contains('dropdown-toggle')) return;
+            showSkeleton();
+        });
+        // Show on form submit (page navigations)
+        document.addEventListener('submit', function(e) {
+            if (e.target.method && e.target.method.toLowerCase() !== 'get') return;
+            showSkeleton();
+        });
+        // Hide immediately when page is ready
+        window.addEventListener('pageshow', function() {
+            if (skeleton) { skeleton.classList.remove('visible'); skeleton.style.display = 'none'; }
+        });
+    </script>
 </body>
 </html>

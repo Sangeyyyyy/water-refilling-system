@@ -92,27 +92,8 @@
                             </div>
                         </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small text-uppercase fw-bold">New Password</label>
-                            <div class="input-group">
-                                <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror" placeholder="Optional">
-                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="#password">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                                @error('password')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small text-uppercase fw-bold">Confirm New Password</label>
-                            <div class="input-group">
-                                <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" placeholder="Optional">
-                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="#password_confirmation">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                            </div>
+                        <div class="col-12 text-start mt-2">
+                            <x-password-input name="password" label="New Password (Optional)" :required="false" :withConfirmation="true" />
                         </div>
 
                         <div class="col-12 mt-5">
@@ -127,23 +108,5 @@
     </div>
 </div>
 
-<script>
-document.querySelectorAll('.toggle-password').forEach(button => {
-    button.addEventListener('click', function() {
-        const targetSelector = this.getAttribute('data-target');
-        const input = document.querySelector(targetSelector);
-        const icon = this.querySelector('i');
-        
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.remove('bi-eye');
-            icon.classList.add('bi-eye-slash');
-        } else {
-            input.type = 'password';
-            icon.classList.remove('bi-eye-slash');
-            icon.classList.add('bi-eye');
-        }
-    });
-});
-</script>
+
 @endsection

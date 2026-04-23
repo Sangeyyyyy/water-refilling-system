@@ -60,7 +60,7 @@ class ClientController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:clients',
-            'password' => 'required|string|min:8|confirmed|regex:/^(?=.*[a-zA-Z])(?=.*\d).+$/',
+            'password' => 'required|string|min:8|confirmed|regex:/^(?=.*[a-z])(?=.*[^A-Za-z0-9]).+$/',
             'office_id' => 'nullable|exists:offices,id',
             'contact_number' => 'required|string|max:20',
         ]);
@@ -108,7 +108,7 @@ class ClientController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('clients')->ignore($user->id)],
-            'password' => 'nullable|string|min:8|confirmed|regex:/^(?=.*[a-zA-Z])(?=.*\d).+$/',
+            'password' => 'nullable|string|min:8|confirmed|regex:/^(?=.*[a-z])(?=.*[^A-Za-z0-9]).+$/',
             'office_id' => 'nullable|exists:offices,id',
             'contact_number' => 'required|string|max:20',
         ]);

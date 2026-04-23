@@ -200,54 +200,10 @@
             </div>
 
             <div class="row g-3">
-                <!-- Password -->
-                <div class="col-md-6 mb-3">
-                    <label for="password" class="form-label fw-bold small text-uppercase text-muted">{{ __('Password') }} <span class="text-danger">*</span></label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-lock text-primary"></i></span>
-                        <input id="password" type="password" class="form-control border-start-0 border-end-0 ps-0 @error('password') is-invalid @enderror" name="password" required autocomplete="new-password" placeholder="••••••••">
-                        <span class="input-group-text bg-transparent border-start-0 toggle-password" style="cursor: pointer;" data-target="#password">
-                            <i class="bi bi-eye text-muted"></i>
-                        </span>
-                    </div>
-                    <div class="text-muted tiny mt-1" style="font-size: 0.7rem;">Minimum 8 characters, must include letters and numbers.</div>
-                    @error('password')
-                        <span class="invalid-feedback d-block mt-1" role="alert"><strong>{{ $message }}</strong></span>
-                    @enderror
-                </div>
-
-                <!-- Confirm Password -->
-                <div class="col-md-6 mb-4">
-                    <label for="password-confirm" class="form-label fw-bold small text-uppercase text-muted">{{ __('Confirm Password') }} <span class="text-danger">*</span></label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-shield-lock text-primary"></i></span>
-                        <input id="password-confirm" type="password" class="form-control border-start-0 border-end-0 ps-0" name="password_confirmation" required autocomplete="new-password" placeholder="••••••••">
-                        <span class="input-group-text bg-transparent border-start-0 toggle-password" style="cursor: pointer;" data-target="#password-confirm">
-                            <i class="bi bi-eye text-muted"></i>
-                        </span>
-                    </div>
+                <div class="col-12 text-start">
+                    <x-password-input name="password" label="Password" :required="true" :withConfirmation="true" />
                 </div>
             </div>
-
-            <script>
-            document.querySelectorAll('.toggle-password').forEach(button => {
-                button.addEventListener('click', function() {
-                    const targetSelector = this.getAttribute('data-target');
-                    const input = document.querySelector(targetSelector);
-                    const icon = this.querySelector('i');
-                    
-                    if (input.type === 'password') {
-                        input.type = 'text';
-                        icon.classList.remove('bi-eye');
-                        icon.classList.add('bi-eye-slash');
-                    } else {
-                        input.type = 'password';
-                        icon.classList.remove('bi-eye-slash');
-                        icon.classList.add('bi-eye');
-                    }
-                });
-            });
-            </script>
 
             <div class="d-grid mb-3">
                 <button type="submit" class="btn btn-primary btn-lg shadow-sm">

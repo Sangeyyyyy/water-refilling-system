@@ -73,9 +73,9 @@ class RegisterController extends Controller
             'office_id' => ['nullable', 'exists:offices,id'],
             'contact_number' => ['required', 'string', 'max:20'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:clients'],
-            'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[a-zA-Z])(?=.*\d).+$/'],
+            'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[a-z])(?=.*[^A-Za-z0-9]).+$/'],
         ], [
-            'password.regex' => 'The password must contain at least one letter and one number.',
+            'password.regex' => 'The password must contain at least 1 lower case character and 1 special character.',
         ]);
     }
 

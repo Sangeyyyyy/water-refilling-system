@@ -534,7 +534,6 @@
             }
             document.getElementById('budget_code_container').style.display = 'block';
             document.getElementById('ppmp_id').setAttribute('required', 'required');
-            checkPpmpBalance();
             fetchBudgetCodes();
         } else {
             fields.style.display = 'none';
@@ -558,6 +557,9 @@
             }
             document.getElementById('ppmp_balance_container').style.display = 'none';
         }
+
+        // Always re-check balance and recalculate totals to clear stale validation messages
+        checkPpmpBalance();
     }
 
     // Hierarchical Office Data

@@ -48,36 +48,14 @@
             background-size: 400% 100%;
             animation: sk-shimmer 1.4s ease infinite;
         }
-        [data-bs-theme="dark"] .sk-block {
-            background: linear-gradient(90deg, #2a2a2a 25%, #383838 50%, #2a2a2a 75%);
-            background-size: 400% 100%;
-        }
-        [data-bs-theme="dark"] #page-skeleton { background: #1a1a2e; }
+
         @keyframes sk-shimmer {
             0%   { background-position: 100% 50%; }
             100% { background-position: -100% 50%; }
         }
     </style>
 
-    <script>
-        // Check local storage
-        const getPreferredTheme = () => {
-            const storedTheme = localStorage.getItem('theme')
-            if (storedTheme) {
-                return storedTheme
-            }
-            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-        }
 
-        const setTheme = function (theme) {
-            if (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                document.documentElement.setAttribute('data-bs-theme', 'dark')
-            } else {
-                document.documentElement.setAttribute('data-bs-theme', theme)
-            }
-        }
-
-        setTheme(getPreferredTheme())
 
         // Initial Sidebar State (to prevent flicker)
         if (localStorage.getItem('sidebar-collapsed') === 'true' && window.innerWidth >= 992) {
@@ -247,15 +225,7 @@
                                     </div>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 mt-2 p-2">
-                                    <li>
-                                        <a class="dropdown-item rounded-3 py-2 transition-all" href="#" id="theme-toggle">
-                                            <div class="d-flex align-items-center">
-                                                <i class="bi bi-sun-fill theme-icon-light me-2 text-warning d-none"></i>
-                                                <i class="bi bi-moon-stars-fill theme-icon-dark me-2 text-primary d-none"></i>
-                                                <span class="theme-text">Dark Mode</span>
-                                            </div>
-                                        </a>
-                                    </li>
+
                                     <li>
                                         <a class="dropdown-item rounded-3 py-2" href="{{ route('profile.edit') }}">
                                             <i class="bi bi-person-gear me-2 text-primary"></i>Profile Settings
@@ -331,13 +301,7 @@
                                         </div>
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 mt-2 p-2">
-                                        <a class="dropdown-item rounded-3 py-2 transition-all" href="#" id="theme-toggle-alt">
-                                            <div class="d-flex align-items-center">
-                                                <i class="bi bi-sun-fill theme-icon-light me-2 text-warning d-none"></i>
-                                                <i class="bi bi-moon-stars-fill theme-icon-dark me-2 text-primary d-none"></i>
-                                                <span class="theme-text">Dark Mode</span>
-                                            </div>
-                                        </a>
+
                                         <a class="dropdown-item rounded-3 py-2" href="{{ route('profile.edit') }}">
                                             <i class="bi bi-person-gear me-2 text-primary"></i>Profile Settings
                                         </a>
@@ -382,37 +346,9 @@
     </div>
     
     <script>
-        const updateThemeUI = (theme) => {
-            const sunIcons = document.querySelectorAll('.theme-icon-light');
-            const moonIcons = document.querySelectorAll('.theme-icon-dark');
-            const themeTexts = document.querySelectorAll('.theme-text');
 
-            if (theme === 'dark') {
-                sunIcons.forEach(icon => icon.classList.remove('d-none'));
-                moonIcons.forEach(icon => icon.classList.add('d-none'));
-                themeTexts.forEach(text => text.innerText = 'Light Mode');
-            } else {
-                sunIcons.forEach(icon => icon.classList.add('d-none'));
-                moonIcons.forEach(icon => icon.classList.remove('d-none'));
-                themeTexts.forEach(text => text.innerText = 'Dark Mode');
-            }
-        }
 
-        // Initialize UI
-        updateThemeUI(getPreferredTheme());
 
-        // Handle multiple theme toggles
-        document.querySelectorAll('#theme-toggle, #theme-toggle-alt').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                
-                localStorage.setItem('theme', newTheme);
-                setTheme(newTheme);
-                updateThemeUI(newTheme);
-            });
-        });
 
         // Sidebar elements
         const adminSidebar = document.getElementById('adminSidebar');

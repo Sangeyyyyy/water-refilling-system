@@ -36,40 +36,14 @@
             background-size: 400% 100%;
             animation: sk-shimmer 1.4s ease infinite;
         }
-        [data-bs-theme="dark"] .sk-block {
-            background: linear-gradient(90deg, #2a2a2a 25%, #383838 50%, #2a2a2a 75%);
-            background-size: 400% 100%;
-        }
-        [data-bs-theme="dark"] #page-skeleton { background: #111; }
+
         @keyframes sk-shimmer {
             0%   { background-position: 100% 50%; }
             100% { background-position: -100% 50%; }
         }
     </style>
 
-    <script>
-        // Track start time for loader
-        window.pageStartTime = Date.now();
-        
-        // Check local storage
-        const getPreferredTheme = () => {
-            const storedTheme = localStorage.getItem('theme')
-            if (storedTheme) {
-                return storedTheme
-            }
-            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-        }
 
-        const setTheme = function (theme) {
-            if (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                document.documentElement.setAttribute('data-bs-theme', 'dark')
-            } else {
-                document.documentElement.setAttribute('data-bs-theme', theme)
-            }
-        }
-
-        setTheme(getPreferredTheme())
-    </script>
     @stack('styles')
 </head>
 <body>
@@ -176,13 +150,7 @@
                                     <i class="bi bi-list-task me-2 text-primary"></i>My Orders
                                 </a>
 
-                                <a class="dropdown-item rounded-3 py-2 transition-all" href="#" id="theme-toggle">
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-sun-fill theme-icon-light me-2 text-warning d-none"></i>
-                                        <i class="bi bi-moon-stars-fill theme-icon-dark me-2 text-primary d-none"></i>
-                                        <span class="theme-text">Dark Mode</span>
-                                    </div>
-                                </a>
+
                                 
                                 <div class="dropdown-divider mx-2"></div>
                                 
@@ -233,41 +201,7 @@
         </footer>
     </div>
     
-    <script>
-        const themeToggle = document.getElementById('theme-toggle');
-        if (themeToggle) {
-            const sunIcon = themeToggle.querySelector('.theme-icon-light');
-            const moonIcon = themeToggle.querySelector('.theme-icon-dark');
 
-            const updateThemeUI = (theme) => {
-                if (theme === 'dark') {
-                    if (sunIcon) sunIcon.classList.remove('d-none');
-                    if (moonIcon) moonIcon.classList.add('d-none');
-                    if (themeToggle.querySelector('.theme-text')) {
-                        themeToggle.querySelector('.theme-text').innerText = 'Light Mode';
-                    }
-                } else {
-                    if (sunIcon) sunIcon.classList.add('d-none');
-                    if (moonIcon) moonIcon.classList.remove('d-none');
-                    if (themeToggle.querySelector('.theme-text')) {
-                        themeToggle.querySelector('.theme-text').innerText = 'Dark Mode';
-                    }
-                }
-            }
-
-            // Initialize UI
-            updateThemeUI(getPreferredTheme());
-
-            themeToggle.addEventListener('click', (e) => {
-                e.preventDefault();
-                const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                
-                localStorage.setItem('theme', newTheme);
-                setTheme(newTheme);
-                updateThemeUI(newTheme);
-            });
-        }
 
         // Hide loader when page is fully loaded, with a minimum delay to ensure the animation is seen
         window.addEventListener('load', function() {

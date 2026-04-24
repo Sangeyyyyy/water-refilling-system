@@ -181,39 +181,53 @@ class DashboardController extends Controller
 
     private function getStats($user, $query)
     {
-        $statsQuery = clone $query;
-        $stats = [
-            'pending' => (clone $statsQuery)->where('orders.status', 'pending')->count(),
-            'confirmed' => (clone $statsQuery)->whereIn('orders.status', ['confirmed', 'out_for_delivery'])->count(),
-            'today_orders' => (clone $statsQuery)->whereDate('orders.created_at', Carbon::today())->count(),
-        ];
-
-        if ($user->role === 'staff') {
-            $stats['out_for_delivery'] = (clone $statsQuery)->where('orders.status', 'out_for_delivery')->count();
-            $stats['confirmed_only'] = (clone $statsQuery)->where('orders.status', 'confirmed')->count();
-            $stats['completed_today'] = Order::whereDate('orders.updated_at', Carbon::today())
-                ->where('orders.status', 'completed')->count();
-        }
-
-        if (in_array($user->role, config('roles.admin_roles'))) {
-            $stats['today_sales'] = Order::whereDate('orders.created_at', Carbon::today())
-                ->whereIn('orders.status', ['confirmed', 'completed', 'out_for_delivery'])
-                ->sum('total_amount');
+        $cacheKey = 'dashboard_stats_' . $user->id . '_' . md5(serialize(request()->all()));
+        
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function() use ($user, $query) {
+            $statsQuery = clone $query;
             
-            $stats['today_gallons'] = Order::whereDate('orders.created_at', Carbon::today())
-                ->whereIn('orders.status', ['confirmed', 'completed', 'out_for_delivery'])
-                ->sum('quantity');
+            $rawStats = $statsQuery->selectRaw("
+                COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending,
+                COUNT(CASE WHEN status IN ('confirmed', 'out_for_delivery') THEN 1 END) as confirmed,
+                COUNT(CASE WHEN DATE(created_at) = CURRENT_DATE THEN 1 END) as today_orders
+            ")->first();
 
-            $stats['month_sales'] = Order::whereMonth('orders.created_at', Carbon::now()->month)
-                ->whereYear('orders.created_at', Carbon::now()->year)
-                ->whereIn('orders.status', ['confirmed', 'completed', 'out_for_delivery'])
-                ->sum('total_amount');
+            $stats = [
+                'pending' => $rawStats->pending ?? 0,
+                'confirmed' => $rawStats->confirmed ?? 0,
+                'today_orders' => $rawStats->today_orders ?? 0,
+            ];
 
-            $stats['office_orders'] = Order::where('customer_type', 'Office')->count();
-            $stats['individual_orders'] = Order::where('customer_type', 'Individual')->count();
-        }
+            if ($user->role === 'staff') {
+                $staffStats = Order::selectRaw("
+                    COUNT(CASE WHEN status = 'out_for_delivery' THEN 1 END) as out_for_delivery,
+                    COUNT(CASE WHEN status = 'confirmed' THEN 1 END) as confirmed_only,
+                    COUNT(CASE WHEN status = 'completed' AND DATE(updated_at) = CURRENT_DATE THEN 1 END) as completed_today
+                ")->first();
 
-        return $stats;
+                $stats['out_for_delivery'] = $staffStats->out_for_delivery ?? 0;
+                $stats['confirmed_only'] = $staffStats->confirmed_only ?? 0;
+                $stats['completed_today'] = $staffStats->completed_today ?? 0;
+            }
+
+            if (in_array($user->role, config('roles.admin_roles'))) {
+                $adminStats = Order::selectRaw("
+                    SUM(CASE WHEN DATE(created_at) = CURRENT_DATE AND status IN ('confirmed', 'completed', 'out_for_delivery') THEN total_amount ELSE 0 END) as today_sales,
+                    SUM(CASE WHEN DATE(created_at) = CURRENT_DATE AND status IN ('confirmed', 'completed', 'out_for_delivery') THEN quantity ELSE 0 END) as today_gallons,
+                    SUM(CASE WHEN MONTH(created_at) = MONTH(CURRENT_DATE) AND YEAR(created_at) = YEAR(CURRENT_DATE) AND status IN ('confirmed', 'completed', 'out_for_delivery') THEN total_amount ELSE 0 END) as month_sales,
+                    COUNT(CASE WHEN customer_type = 'Office' THEN 1 END) as office_orders,
+                    COUNT(CASE WHEN customer_type = 'Individual' THEN 1 END) as individual_orders
+                ")->first();
+
+                $stats['today_sales'] = $adminStats->today_sales ?? 0;
+                $stats['today_gallons'] = $adminStats->today_gallons ?? 0;
+                $stats['month_sales'] = $adminStats->month_sales ?? 0;
+                $stats['office_orders'] = $adminStats->office_orders ?? 0;
+                $stats['individual_orders'] = $adminStats->individual_orders ?? 0;
+            }
+
+            return $stats;
+        });
     }
 
     private function getPendingQueue($query, $dateFrom, $dateTo, Request $request)
@@ -283,60 +297,64 @@ class DashboardController extends Controller
 
     private function getAdvancedDashboardData($user, $inventoryStats)
     {
-        $dashboardData = [];
+        $cacheKey = 'advanced_dashboard_data_' . $user->id;
         
-        $salesTrend = Order::where('created_at', '>=', Carbon::now()->subDays(30))
-            ->whereIn('status', ['confirmed', 'completed', 'out_for_delivery'])
-            ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(total_amount) as total'))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
-        
-        $dashboardData['sales_trend'] = [
-            'labels' => $salesTrend->pluck('date')->map(fn($d) => Carbon::parse($d)->format('M d')),
-            'data' => $salesTrend->pluck('total')
-        ];
-
-        $campusConsumption = DB::table('orders')
-            ->join('offices', 'orders.office_id', '=', 'offices.id')
-            ->join('divisions', 'offices.division_id', '=', 'divisions.id')
-            ->join('campuses', 'divisions.campus_id', '=', 'campuses.id')
-            ->whereIn('orders.status', ['confirmed', 'completed', 'out_for_delivery'])
-            ->select('campuses.name', DB::raw('SUM(orders.quantity) as volume'))
-            ->groupBy('campuses.name')
-            ->get();
-        
-        $dashboardData['campus_consumption'] = [
-            'labels' => $campusConsumption->pluck('name'),
-            'data' => $campusConsumption->pluck('volume')
-        ];
-
-        if (in_array($user->role, config('roles.management_roles'))) {
-            $dashboardData['user_counts'] = [
-                'total' => User::count(),
-                'clients' => Client::count(),
-                'staff' => User::whereIn('role', config('roles.admin_roles'))->count()
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 600, function() use ($user, $inventoryStats) {
+            $dashboardData = [];
+            
+            $salesTrend = Order::where('created_at', '>=', Carbon::now()->subDays(30))
+                ->whereIn('status', ['confirmed', 'completed', 'out_for_delivery'])
+                ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(total_amount) as total'))
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
+            
+            $dashboardData['sales_trend'] = [
+                'labels' => $salesTrend->pluck('date')->map(fn($d) => Carbon::parse($d)->format('M d')),
+                'data' => $salesTrend->pluck('total')
             ];
-        }
 
-        $dashboardData['low_ppmp_alerts'] = Ppmp::with('office')
-            ->where('status', 'approved')
-            ->whereRaw('remaining_budget <= (total_budget * 0.2)')
-            ->get();
-        
-        $dashboardData['inventory_alerts'] = Inventory::whereRaw('stock_level <= low_stock_threshold')->get();
+            $campusConsumption = DB::table('orders')
+                ->join('offices', 'orders.office_id', '=', 'offices.id')
+                ->join('divisions', 'offices.division_id', '=', 'divisions.id')
+                ->join('campuses', 'divisions.campus_id', '=', 'campuses.id')
+                ->whereIn('orders.status', ['confirmed', 'completed', 'out_for_delivery'])
+                ->select('campuses.name', DB::raw('SUM(orders.quantity) as volume'))
+                ->groupBy('campuses.name')
+                ->get();
+            
+            $dashboardData['campus_consumption'] = [
+                'labels' => $campusConsumption->pluck('name'),
+                'data' => $campusConsumption->pluck('volume')
+            ];
 
-        $dashboardData['top_units'] = Order::whereMonth('created_at', Carbon::now()->month)
-            ->whereYear('created_at', Carbon::now()->year)
-            ->whereIn('status', ['confirmed', 'completed', 'out_for_delivery'])
-            ->whereNotNull('office_id')
-            ->select('office_id', DB::raw('SUM(quantity) as total_gallons'))
-            ->with('office')
-            ->groupBy('office_id')
-            ->orderByDesc('total_gallons')
-            ->take(5)
-            ->get();
+            if (in_array($user->role, config('roles.management_roles'))) {
+                $dashboardData['user_counts'] = [
+                    'total' => User::count(),
+                    'clients' => Client::count(),
+                    'staff' => User::whereIn('role', config('roles.admin_roles'))->count()
+                ];
+            }
 
-        return $dashboardData;
+            $dashboardData['low_ppmp_alerts'] = Ppmp::with('office')
+                ->where('status', 'approved')
+                ->whereRaw('remaining_budget <= (total_budget * 0.2)')
+                ->get();
+            
+            $dashboardData['inventory_alerts'] = Inventory::whereRaw('stock_level <= low_stock_threshold')->get();
+
+            $dashboardData['top_units'] = Order::whereMonth('created_at', Carbon::now()->month)
+                ->whereYear('created_at', Carbon::now()->year)
+                ->whereIn('status', ['confirmed', 'completed', 'out_for_delivery'])
+                ->whereNotNull('office_id')
+                ->select('office_id', DB::raw('SUM(quantity) as total_gallons'))
+                ->with('office')
+                ->groupBy('office_id')
+                ->orderByDesc('total_gallons')
+                ->take(5)
+                ->get();
+
+            return $dashboardData;
+        });
     }
 }

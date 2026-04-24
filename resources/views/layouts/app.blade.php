@@ -20,28 +20,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
 
-    <style>
-        /* ===== SKELETON LOADING ===== */
-        #page-skeleton {
-            position: fixed; inset: 0; z-index: 9999;
-            background: var(--bs-body-bg, #fff);
-            display: none; opacity: 0;
-            transition: opacity 0.15s ease;
-            flex-direction: column;
-        }
-        #page-skeleton.visible { display: flex !important; opacity: 1; }
-        .sk-block {
-            border-radius: 8px;
-            background: linear-gradient(90deg, #e8e8e8 25%, #f8f8f8 50%, #e8e8e8 75%);
-            background-size: 400% 100%;
-            animation: sk-shimmer 1.4s ease infinite;
-        }
 
-        @keyframes sk-shimmer {
-            0%   { background-position: 100% 50%; }
-            100% { background-position: -100% 50%; }
-        }
-    </style>
 
 
     @stack('styles')
@@ -52,21 +31,7 @@
     @endphp
     @include('components.water-loader', ['show' => $showLoader])
 
-    <!-- Skeleton Loading Overlay -->
-    <div id="page-skeleton">
-        <div style="height:64px;display:flex;align-items:center;padding:0 1.5rem;gap:1rem;border-bottom:1px solid rgba(0,0,0,.1);">
-            <div class="sk-block" style="width:44px;height:44px;border-radius:50%;"></div>
-            <div class="sk-block" style="width:180px;height:18px;"></div>
-            <div class="sk-block ms-auto" style="width:110px;height:38px;border-radius:20px;"></div>
-            <div class="sk-block" style="width:38px;height:38px;border-radius:50%;"></div>
-        </div>
-        <div style="padding:2rem;display:flex;flex-direction:column;gap:1rem;max-width:900px;margin:0 auto;width:100%;">
-            <div class="sk-block" style="height:32px;width:35%;"></div>
-            @for($i=0;$i<7;$i++)
-            <div class="sk-block" style="height:52px;"></div>
-            @endfor
-        </div>
-    </div>
+
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-glass sticky-top shadow-sm">
             <div class="container">
@@ -220,26 +185,6 @@
         });
     </script>
     @stack('scripts')
-    <script>
-        // ===== SKELETON LOADING =====
-        const skeleton = document.getElementById('page-skeleton');
-        function showSkeleton() {
-            if (skeleton) {
-                skeleton.style.display = 'flex';
-                requestAnimationFrame(() => skeleton.classList.add('visible'));
-            }
-        }
-        document.addEventListener('click', function(e) {
-            const a = e.target.closest('a[href]');
-            if (!a) return;
-            const href = a.getAttribute('href');
-            if (!href || href.startsWith('#') || href.startsWith('javascript') || a.target === '_blank' || e.ctrlKey || e.metaKey) return;
-            if (a.classList.contains('dropdown-toggle')) return;
-            showSkeleton();
-        });
-        window.addEventListener('pageshow', function() {
-            if (skeleton) { skeleton.classList.remove('visible'); skeleton.style.display = 'none'; }
-        });
-    </script>
+
 </body>
 </html>

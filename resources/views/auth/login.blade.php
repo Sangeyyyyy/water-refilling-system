@@ -31,11 +31,6 @@
             <div class="mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <label for="password" class="form-label fw-bold small text-uppercase text-muted mb-0">{{ __('Password') }} <span class="text-danger">*</span></label>
-                    @if (Route::has('password.request'))
-                        <a class="btn btn-link btn-sm text-decoration-none p-0" href="{{ route('password.request') }}">
-                            {{ __('Forgot Password?') }}
-                        </a>
-                    @endif
                 </div>
                 <div class="input-group">
                     <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-lock text-primary"></i></span>
@@ -88,6 +83,11 @@
                 <button type="submit" class="btn btn-primary btn-lg shadow-sm">
                     {{ __('Sign In') }}
                 </button>
+            </div>
+
+            <div class="text-center mt-4">
+                <hr class="text-muted opacity-25">
+                <p class="text-muted small mb-0"><i class="bi bi-info-circle me-1"></i> Forgot your password? Please contact <strong>TSSU</strong> for assistance.</p>
             </div>
 
 

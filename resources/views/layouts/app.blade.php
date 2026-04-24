@@ -201,8 +201,7 @@
         </footer>
     </div>
     
-
-
+    <script>
         // Hide loader when page is fully loaded, with a minimum delay to ensure the animation is seen
         window.addEventListener('load', function() {
             const loader = document.getElementById('water-loader-wrapper');

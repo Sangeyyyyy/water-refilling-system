@@ -26,10 +26,7 @@
     @stack('styles')
 </head>
 <body>
-    @php
-        $showLoader = request()->routeIs('welcome') || request()->routeIs('home') || request()->is('/');
-    @endphp
-    @include('components.water-loader', ['show' => $showLoader])
+
 
 
     <div id="app">
@@ -166,24 +163,7 @@
         </footer>
     </div>
     
-    <script>
-        // Hide loader when page is fully loaded, with a minimum delay to ensure the animation is seen
-        window.addEventListener('load', function() {
-            const loader = document.getElementById('water-loader-wrapper');
-            const minDisplayTime = 2500; // 2.5 seconds for a satisfying "fill"
-            const loadTime = Date.now() - window.pageStartTime;
-            const remainingTime = Math.max(0, minDisplayTime - loadTime);
 
-            setTimeout(() => {
-                if (loader) {
-                    loader.classList.add('fade-out');
-                    setTimeout(() => {
-                        loader.style.display = 'none';
-                    }, 500);
-                }
-            }, remainingTime);
-        });
-    </script>
     @stack('scripts')
 
 </body>

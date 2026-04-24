@@ -1075,13 +1075,7 @@
 
     function confirmAndSubmit() {
         const btn = document.querySelector('#reviewOrderModal .btn-primary');
-        const loader = document.getElementById('water-loader-wrapper');
-        if(loader) {
-            loader.style.display = 'flex';
-            loader.style.opacity = '1';
-            loader.style.visibility = 'visible';
-            loader.classList.remove('fade-out');
-        }
+
 
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Submitting...';

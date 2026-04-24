@@ -18,13 +18,11 @@ trait LogsActivity
      */
     protected function logActivity($action, $description, $details = null)
     {
-        return ActivityLog::create([
-            'user_id' => auth('web')->id(),
-            'action' => $action,
-            'description' => $description,
-            'details' => $details,
-            'ip_address' => Request::ip(),
-            'user_agent' => Request::header('User-Agent'),
-        ]);
+        // Capture context request data before dispatching the job
+        $userId = auth('web')->id() ?? auth('client')->id();
+        $ip = Request::ip();
+        $userAgent = Request::header('User-Agent');
+
+        \App\Jobs\LogActivityJob::dispatch($userId, $action, $description, $details, $ip, $userAgent);
     }
 }

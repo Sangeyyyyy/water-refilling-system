@@ -56,7 +56,7 @@
     </style>
 
 
-
+    <script>
         // Initial Sidebar State (to prevent flicker)
         if (localStorage.getItem('sidebar-collapsed') === 'true' && window.innerWidth >= 992) {
             document.documentElement.classList.add('sidebar-is-collapsed');

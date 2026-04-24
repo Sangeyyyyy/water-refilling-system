@@ -181,11 +181,12 @@ class DashboardController extends Controller
 
     private function getStats($user, $query)
     {
-        $cacheKey = 'dashboard_stats_' . $user->id . '_' . md5(serialize(request()->all()));
+        $cacheKey = 'dashboard_stats_' . $user->id;
         
         return \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function() use ($user, $query) {
             $statsQuery = clone $query;
             
+            // Consolidate basic stats into one query
             $rawStats = $statsQuery->selectRaw("
                 COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending,
                 COUNT(CASE WHEN status IN ('confirmed', 'out_for_delivery') THEN 1 END) as confirmed,

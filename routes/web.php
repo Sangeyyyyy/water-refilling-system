@@ -45,7 +45,7 @@ Route::get('/order', [OrderController::class, 'create'])->name('orders.create');
 Route::post('/order', [OrderController::class, 'store'])->name('orders.store');
 Route::get('/order/success/{order}', [OrderController::class, 'success'])->name('orders.success');
 
-Auth::routes(['register' => true]);
+Auth::routes(['register' => false]);
 
 Route::middleware(['auth:web,client'])->group(function () { // Grouped authenticated routes
     Route::get('/home', [DashboardController::class, 'index'])->name('home');

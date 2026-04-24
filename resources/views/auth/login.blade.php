@@ -90,11 +90,7 @@
                 </button>
             </div>
 
-            <div class="text-center mt-4">
-                <hr class="text-muted opacity-25">
-                <p class="text-muted small mb-3">Don't have an account yet?</p>
-                <a href="{{ url('/register') }}" class="btn btn-outline-primary btn-sm rounded-pill px-4">Create New Account</a>
-            </div>
+
         </form>
     </div>
 </div>

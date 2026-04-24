@@ -18,11 +18,16 @@ trait LogsActivity
      */
     protected function logActivity($action, $description, $details = null)
     {
-        // Capture context request data before dispatching the job
-        $userId = auth('web')->id() ?? auth('client')->id();
-        $ip = Request::ip();
-        $userAgent = Request::header('User-Agent');
+        try {
+            // Capture context request data before dispatching the job
+            $userId = auth('web')->id() ?? auth('client')->id();
+            $ip = Request::ip();
+            $userAgent = Request::header('User-Agent');
 
-        \App\Jobs\LogActivityJob::dispatch($userId, $action, $description, $details, $ip, $userAgent);
+            \App\Jobs\LogActivityJob::dispatch($userId, $action, $description, $details, $ip, $userAgent);
+        } catch (\Exception $e) {
+            // Fallback: Just log to larval.log so it doesn't crash the request
+            \Illuminate\Support\Facades\Log::error("Failed to log activity: " . $e->getMessage());
+        }
     }
 }

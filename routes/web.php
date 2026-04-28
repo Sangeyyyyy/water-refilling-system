@@ -15,6 +15,7 @@ use App\Http\Controllers\PpmpController;
 use App\Http\Controllers\Api\OfficePpmpController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,6 +53,12 @@ Route::middleware(['auth:web,client'])->group(function () { // Grouped authentic
     Route::get('/home', [DashboardController::class, 'index'])->name('home');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
+    // Notifications (admin/staff)
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+
     Route::get('/admin/history', [AdminOrderController::class, 'history'])->middleware('role:admin,director,manager,staff')->name('admin.history');
     Route::put('/admin/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.status');
     Route::put('/admin/orders/batch-status', [AdminOrderController::class, 'batchUpdateStatus'])->name('admin.orders.batch-status');

@@ -51,11 +51,10 @@ class OrderPlaced extends Notification
     {
         return [
             'order_id' => $this->order->id,
-            'reference_number' => $this->order->reference_number,
-            'client_name' => $this->order->full_client_name,
+            'client_name' => $this->order->client_name,
             'quantity' => $this->order->quantity,
             'total_amount' => $this->order->total_amount,
-            'message' => "New order #{$this->order->reference_number} placed by {$this->order->full_client_name}.",
+            'message' => "New order #{$this->order->id} placed by {$this->order->client_name}.",
         ];
     }
 }

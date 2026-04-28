@@ -135,6 +135,24 @@
                             </div>
                         </div>
                         <div class="d-flex align-items-center gap-3">
+                            @if(auth()->check() && in_array(auth()->user()->role, ['admin','director','manager','staff']))
+                            {{-- Notification Bell --}}
+                            <div class="dropdown" id="notifDropdownWrapper">
+                                <button class="btn p-1 position-relative d-flex align-items-center justify-content-center rounded-circle" id="notifBell" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications" style="width:38px;height:38px;background:rgba(13,110,253,0.1);border:none;">
+                                    <i class="bi bi-bell-fill text-primary" style="font-size:1.1rem;" id="notifBellIcon"></i>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notifBadge" style="font-size:0.6rem;">0</span>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 mt-2 p-0" style="min-width:330px;max-width:380px;" id="notifDropdown">
+                                    <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2 border-bottom">
+                                        <span class="fw-bold text-dark">Notifications</span>
+                                        <button class="btn btn-link btn-sm text-primary p-0 text-decoration-none" id="markAllReadBtn">Mark all read</button>
+                                    </div>
+                                    <ul class="list-unstyled mb-0" id="notifList" style="max-height:320px;overflow-y:auto;">
+                                        <li class="text-center text-muted py-4 small" id="notifEmpty">No new notifications</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            @endif
                             <div class="dropdown">
                                 <a class="d-flex align-items-center text-decoration-none dropdown-toggle p-1 pe-3 rounded-pill hover-bg-light transition-all" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
@@ -325,6 +343,118 @@
 
         setInterval(updateClock, 1000);
         updateClock();
+
+        // ─── Notification Bell ────────────────────────────────────────────
+        (function () {
+            const isAdmin = {{ auth()->check() && in_array(auth()->user()->role ?? '', ['admin','director','manager','staff']) ? 'true' : 'false' }};
+            if (!isAdmin) return;
+
+            const badge       = document.getElementById('notifBadge');
+            const bellIcon    = document.getElementById('notifBellIcon');
+            const notifList   = document.getElementById('notifList');
+            const emptyMsg    = document.getElementById('notifEmpty');
+            const markAllBtn  = document.getElementById('markAllReadBtn');
+            const csrfToken   = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            let lastCount = 0;
+
+            // Soft chime via Web Audio API
+            function playChime() {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(880, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.4);
+                    gain.gain.setValueAtTime(0.4, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.5);
+                } catch(e) {}
+            }
+
+            function markRead(id, listItem) {
+                fetch(`/notifications/${id}/read`, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+                }).then(() => {
+                    if (listItem) listItem.remove();
+                    fetchNotifications();
+                });
+            }
+
+            function renderNotifications(notifications, count) {
+                // update badge
+                if (count > 0) {
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.classList.remove('d-none');
+                    bellIcon.classList.add('text-danger');
+                    bellIcon.classList.remove('text-muted');
+                } else {
+                    badge.classList.add('d-none');
+                    bellIcon.classList.remove('text-danger');
+                    bellIcon.classList.add('text-muted');
+                }
+
+                // build list
+                notifList.innerHTML = '';
+                if (notifications.length === 0) {
+                    notifList.appendChild(emptyMsg.cloneNode(true));
+                    return;
+                }
+
+                notifications.forEach(n => {
+                    const li = document.createElement('li');
+                    li.className = 'border-bottom';
+                    li.innerHTML = `
+                        <div class="d-flex align-items-start px-3 py-2 gap-2 notif-item" style="cursor:pointer;">
+                            <div class="mt-1 flex-shrink-0">
+                                <span class="badge rounded-circle bg-primary-subtle p-2"><i class="bi bi-droplet-fill text-primary"></i></span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="small text-dark">${n.message}</div>
+                                <div class="text-muted" style="font-size:0.7rem;">${n.created_at}</div>
+                            </div>
+                            <button class="btn btn-link btn-sm text-muted p-0 ms-1 flex-shrink-0 mark-read-btn" title="Mark read" data-id="${n.id}"><i class="bi bi-check2"></i></button>
+                        </div>`;
+                    li.querySelector('.mark-read-btn').addEventListener('click', e => {
+                        e.stopPropagation();
+                        markRead(n.id, li);
+                    });
+                    notifList.appendChild(li);
+                });
+            }
+
+            function fetchNotifications() {
+                fetch('/notifications', { headers: { 'Accept': 'application/json' } })
+                    .then(r => r.json())
+                    .then(data => {
+                        const newCount = data.count;
+                        if (newCount > lastCount && lastCount !== null) {
+                            playChime();
+                        }
+                        lastCount = newCount;
+                        renderNotifications(data.notifications, newCount);
+                    })
+                    .catch(() => {});
+            }
+
+            if (markAllBtn) {
+                markAllBtn.addEventListener('click', () => {
+                    fetch('/notifications/read-all', {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+                    }).then(() => { lastCount = 0; fetchNotifications(); });
+                });
+            }
+
+            // Initial fetch + poll every 15 s
+            fetchNotifications();
+            setInterval(fetchNotifications, 15000);
+        })();
 
         // Auto-dismiss success alerts after 5 seconds
         document.addEventListener('DOMContentLoaded', function() {

@@ -7,7 +7,7 @@
                 <div class="position-absolute top-0 end-0 p-3 opacity-25">
                     <i class="bi bi-hourglass-split" style="font-size: 3.5rem; color: var(--primary-color);"></i>
                 </div>
-                <h6 class="text-uppercase text-muted fw-bold mb-2">Pending Orders</h6>
+                <h6 class="text-uppercase text-muted fw-bold mb-2">To Be Refilled</h6>
                 <h2 class="display-4 fw-bold text-primary mb-0">{{ $stats['confirmed_only'] }}</h2>
             </div>
         </div>

@@ -90,13 +90,13 @@ class DashboardController extends Controller
                 $dateFrom = Carbon::now()->startOfMonth()->format('Y-m-d');
                 $dateTo = Carbon::now()->endOfMonth()->format('Y-m-d');
             }
+        }
 
-            if ($dateFrom) {
-                $query->whereDate('orders.delivery_date', '>=', $dateFrom);
-            }
-            if ($dateTo) {
-                $query->whereDate('orders.delivery_date', '<=', $dateTo);
-            }
+        if ($dateFrom) {
+            $query->whereDate('orders.delivery_date', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->whereDate('orders.delivery_date', '<=', $dateTo);
         }
         
         if ($request->filled('status')) {
@@ -113,7 +113,7 @@ class DashboardController extends Controller
             $query->search($request->search);
         }
         
-        $stats = $this->getStats($user, $query);
+        $stats = $this->getStats($user, $query, $request);
 
         $inventoryStats = Inventory::all()->keyBy('item_name');
         
@@ -179,11 +179,11 @@ class DashboardController extends Controller
         return view($view, compact('dateFrom', 'dateTo', 'orders', 'stats', 'offices', 'sort', 'dashboardData', 'unitPrice', 'pendingOrders', 'deliveryQueue', 'completedToday'));
     }
 
-    private function getStats($user, $query)
+    private function getStats($user, $query, Request $request)
     {
-        $cacheKey = 'dashboard_stats_' . $user->id;
+        $cacheKey = 'dashboard_stats_' . $user->id . '_' . md5(serialize($request->only(['date_from', 'date_to', 'status', 'customer_type', 'order_type', 'search'])));
         
-        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function() use ($user, $query) {
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 60, function() use ($user, $query) {
             $statsQuery = clone $query;
             
             // Consolidate basic stats into one query
@@ -200,7 +200,7 @@ class DashboardController extends Controller
             ];
 
             if ($user->role === 'staff') {
-                $staffStats = Order::selectRaw("
+                $staffStats = (clone $query)->selectRaw("
                     COUNT(CASE WHEN status = 'out_for_delivery' THEN 1 END) as out_for_delivery,
                     COUNT(CASE WHEN status = 'confirmed' THEN 1 END) as confirmed_only,
                     COUNT(CASE WHEN status = 'completed' AND DATE(updated_at) = CURRENT_DATE THEN 1 END) as completed_today

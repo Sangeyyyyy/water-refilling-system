@@ -135,10 +135,13 @@ class OrderController extends Controller
         $this->logActivity('Online Order', "Placed an online order (#{$order->id}) for {$order->client_name} ({$order->quantity} units).", ['order_id' => $order->id]);
 
         // Notify Admins, Managers, Directors, and Staff
-        $adminRoles = config('roles.admin_roles', ['admin', 'director', 'manager', 'staff']);
-        $admins = User::whereIn('role', $adminRoles)->get();
-        Notification::send($admins, new OrderPlaced($order));
-
+        try {
+            $adminRoles = config('roles.admin_roles', ['admin', 'director', 'manager', 'staff']);
+            $admins = User::whereIn('role', $adminRoles)->get();
+            Notification::send($admins, new OrderPlaced($order));
+        } catch (\Throwable $e) {
+            \Log::error('OrderPlaced notification failed: ' . $e->getMessage());
+        }
 
         return redirect()->route('orders.success', $order->id);
     }

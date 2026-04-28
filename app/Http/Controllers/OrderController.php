@@ -11,6 +11,9 @@ use App\Traits\LogsActivity;
 use App\Http\Requests\StoreOrderRequest;
 use App\Traits\ManagesInventory;
 use App\Models\Setting;
+use App\Models\User;
+use App\Notifications\OrderPlaced;
+use Illuminate\Support\Facades\Notification;
 
 class OrderController extends Controller
 {
@@ -131,6 +134,11 @@ class OrderController extends Controller
 
         $this->logActivity('Online Order', "Placed an online order (#{$order->id}) for {$order->client_name} ({$order->quantity} units).", ['order_id' => $order->id]);
 
+        // Notify Admins, Managers, Directors, and Staff
+        $adminRoles = config('roles.admin_roles', ['admin', 'director', 'manager', 'staff']);
+        $admins = User::whereIn('role', $adminRoles)->get();
+        Notification::send($admins, new OrderPlaced($order));
+
 
         return redirect()->route('orders.success', $order->id);
     }
@@ -138,6 +146,29 @@ class OrderController extends Controller
     public function success(Order $order)
     {
         return view('orders.success', compact('order'));
+    }
+
+    public function cancel(Order $order)
+    {
+        // Ensure the user is authorized to cancel this order
+        if ($order->client_id !== auth('client')->id() && $order->user_id !== auth('web')->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if (!in_array($order->status, ['pending', 'confirmed'])) {
+            return back()->with('error', 'This order cannot be cancelled at its current status.');
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function() use ($order) {
+            $this->returnOrderStock($order);
+            $this->returnOrderBudget($order);
+            
+            $order->update(['status' => 'cancelled']);
+        });
+
+        $this->logActivity('Order Cancelled', "Client #{$order->id} was cancelled by the customer.", ['order_id' => $order->id]);
+
+        return back()->with('success', "Order #{$order->id} has been cancelled successfully.");
     }
 
     private function getNextDeliveryDates($count = 6)

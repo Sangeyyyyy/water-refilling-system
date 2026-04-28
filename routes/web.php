@@ -44,6 +44,7 @@ Route::get('/', function () {
 Route::get('/order', [OrderController::class, 'create'])->name('orders.create');
 Route::post('/order', [OrderController::class, 'store'])->name('orders.store');
 Route::get('/order/success/{order}', [OrderController::class, 'success'])->name('orders.success');
+Route::post('/order/cancel/{order}', [OrderController::class, 'cancel'])->name('orders.cancel');
 
 Auth::routes(['register' => false, 'reset' => false]);
 
@@ -59,6 +60,7 @@ Route::middleware(['auth:web,client'])->group(function () { // Grouped authentic
     Route::post('/admin/walkin', [WalkInOrderController::class, 'store'])->name('admin.walkin.store');
 
     Route::get('/reports/billing/{order}', [ReportController::class, 'billing'])->name('reports.billing');
+    Route::get('/reports/billing/batch', [ReportController::class, 'batchBilling'])->name('reports.billing.batch');
     Route::get('/reports/delivery-receipt/{order}', [ReportController::class, 'deliveryReceipt'])->name('reports.delivery-receipt');
     Route::get('/reports/delivery-receipts/batch', [ReportController::class, 'batchDeliveryReceipts'])->name('reports.delivery-receipts.batch');
     Route::middleware(['admin'])->group(function () {

@@ -46,11 +46,11 @@ class ReportController extends Controller
     {
         $ids = explode(',', $request->query('ids', ''));
         $orders = \App\Models\Order::with('office')->whereIn('id', $ids)->get();
-
+ 
         if ($orders->isEmpty()) {
             return redirect()->back()->with('error', 'No orders selected for printing.');
         }
-
+ 
         // Group orders for consolidation
         // Criteria: Same Date, Same Client, Same Office/Other Location, Same Delivery Window
         $groupedOrders = $orders->groupBy(function($order) {
@@ -66,7 +66,7 @@ class ReportController extends Controller
             if (empty($references)) {
                 $references = $group->map(fn($o) => '#' . str_pad($o->id, 5, '0', STR_PAD_LEFT))->implode(', ');
             }
-
+ 
             return (object) [
                 'primary' => $primary,
                 'items' => $group, // List all orders in this group as items
@@ -78,8 +78,20 @@ class ReportController extends Controller
                 'pr_numbers' => $group->pluck('pr_number')->filter()->unique()->implode(', ') ?: 'N/A'
             ];
         });
-
+ 
         return view('reports.batch_delivery_receipts', compact('groupedOrders'));
+    }
+ 
+    public function batchBilling(\Illuminate\Http\Request $request)
+    {
+        $ids = explode(',', $request->query('ids', ''));
+        $orders = \App\Models\Order::with('office')->whereIn('id', $ids)->get();
+ 
+        if ($orders->isEmpty()) {
+            return redirect()->back()->with('error', 'No orders selected for printing.');
+        }
+ 
+        return view('reports.batch_billing', compact('orders'));
     }
 
     public function printFinancial(Request $request)

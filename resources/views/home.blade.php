@@ -103,10 +103,21 @@
                                     <i class="bi bi-clock me-1"></i> Delivery scheduled for <span class="fw-bold text-dark">{{ $order->delivery_date ? $order->delivery_date->format('M d, Y') : 'Immediate' }}</span>
                                 @endif
                             </div>
-                            <button class="btn btn-sm btn-outline-primary rounded-pill px-4"
-                                    onclick="showOrderDetails({{ $order->toJson() }}, '{{ addslashes($order->office?->division?->campus?->name ?? 'OTHERS') }}', '{{ addslashes($order->office?->division?->display_name ?? '') }}', '{{ addslashes($order->office?->name ?? $order->other_location) }}')">
-                                View Details
-                            </button>
+                            <div class="d-flex gap-2">
+                                @if(in_array($order->status, ['pending', 'confirmed']))
+                                    <form action="{{ route('orders.cancel', $order->id) }}" method="POST" id="cancel-form-{{ $order->id }}" class="d-none">
+                                        @csrf
+                                    </form>
+                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-4"
+                                            onclick="if(confirm('Are you sure you want to cancel order {{ $order->reference_number ?? $order->id }}?')) document.getElementById('cancel-form-{{ $order->id }}').submit();">
+                                        Cancel Order
+                                    </button>
+                                @endif
+                                <button class="btn btn-sm btn-outline-primary rounded-pill px-4"
+                                        onclick="showOrderDetails({{ $order->toJson() }}, '{{ addslashes($order->office?->division?->campus?->name ?? 'OTHERS') }}', '{{ addslashes($order->office?->division?->display_name ?? '') }}', '{{ addslashes($order->office?->name ?? $order->other_location) }}')">
+                                    View Details
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

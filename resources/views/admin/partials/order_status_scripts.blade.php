@@ -29,6 +29,9 @@
         </div>
         <div class="d-flex flex-wrap gap-2 justify-content-end ms-auto w-100">
             <button type="button" class="btn btn-sm btn-light border px-3 flex-grow-1" onclick="clearBatch()">Cancel</button>
+            <button type="button" class="btn btn-sm btn-outline-success px-3 fw-bold shadow-sm flex-grow-1" onclick="batchPrintBilling('order-checkbox')">
+                <i class="bi bi-file-earmark-text me-1"></i> Print Billing
+            </button>
             <button type="button" class="btn btn-sm btn-primary px-3 fw-bold shadow-sm flex-grow-1" onclick="submitBatchDispatch()">
                 <i class="bi bi-check-circle me-1"></i> Mark as Refilled
             </button>
@@ -48,6 +51,9 @@
         </div>
         <div class="d-flex flex-wrap gap-2 justify-content-end ms-auto w-100">
             <button type="button" class="btn btn-sm btn-light border px-3 flex-grow-1" onclick="clearPrintBatch()">Cancel</button>
+            <button type="button" class="btn btn-sm btn-outline-success px-3 fw-bold shadow-sm flex-grow-1" onclick="batchPrintBilling('delivery-checkbox')">
+                <i class="bi bi-file-earmark-text me-1"></i> Print Billing
+            </button>
             <button type="button" class="btn btn-sm btn-primary px-3 fw-bold shadow-sm flex-grow-1" onclick="batchPrintReceipts()">
                 <i class="bi bi-printer-fill me-1"></i> Print Receipts
             </button>
@@ -259,6 +265,13 @@
 
         const ids = Array.from(checkedBoxes).map(cb => cb.value).join(',');
         window.open(`/reports/delivery-receipts/batch?ids=${ids}`, '_blank');
+    }
+    function batchPrintBilling(checkboxClass) {
+        const checkedBoxes = document.querySelectorAll(`.${checkboxClass}:checked`);
+        if (checkedBoxes.length === 0) return;
+ 
+        const ids = Array.from(checkedBoxes).map(cb => cb.value).join(',');
+        window.open(`/reports/billing/batch?ids=${ids}`, '_blank');
     }
 </script>
 @endpush

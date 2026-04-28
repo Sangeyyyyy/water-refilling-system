@@ -451,9 +451,9 @@
                 });
             }
 
-            // Initial fetch + poll every 15 s
+            // Initial fetch + poll every 3 s for near-instant notifications
             fetchNotifications();
-            setInterval(fetchNotifications, 15000);
+            setInterval(fetchNotifications, 3000);
         })();
 
         // Auto-dismiss success alerts after 5 seconds

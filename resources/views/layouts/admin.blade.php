@@ -349,55 +349,102 @@
             const isAdmin = {{ auth()->check() && in_array(auth()->user()->role ?? '', ['admin','director','manager','staff']) ? 'true' : 'false' }};
             if (!isAdmin) return;
 
-            const badge       = document.getElementById('notifBadge');
-            const bellIcon    = document.getElementById('notifBellIcon');
-            const notifList   = document.getElementById('notifList');
-            const emptyMsg    = document.getElementById('notifEmpty');
-            const markAllBtn  = document.getElementById('markAllReadBtn');
-            const csrfToken   = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const badge      = document.getElementById('notifBadge');
+            const bellIcon   = document.getElementById('notifBellIcon');
+            const notifList  = document.getElementById('notifList');
+            const emptyMsg   = document.getElementById('notifEmpty');
+            const markAllBtn = document.getElementById('markAllReadBtn');
+            const csrfToken  = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            let lastCount = null; // Changed to null to avoid chime on first load of old notifications
-            let audioCtx = null;
+            let lastCount = null;
 
-            // Simple user interaction listener to unlock audio
-            const unlockAudio = () => {
-                if (!audioCtx) {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            // ── Audio: use HTML5 <audio> element (works without user gesture after first interaction)
+            const notifAudio = new Audio('{{ asset("sounds/notify.wav") }}');
+            notifAudio.volume = 0.6;
+            // Pre-load on first page interaction so it can play later without gesture
+            let audioPrimed = false;
+            const primeAudio = () => {
+                if (!audioPrimed) {
+                    notifAudio.play().then(() => {
+                        notifAudio.pause();
+                        notifAudio.currentTime = 0;
+                        audioPrimed = true;
+                    }).catch(() => {});
+                    document.removeEventListener('click', primeAudio);
+                    document.removeEventListener('keydown', primeAudio);
                 }
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-                // Once unlocked/resumed, we can remove the listeners
-                window.removeEventListener('click', unlockAudio);
-                window.removeEventListener('touchstart', unlockAudio);
-                window.removeEventListener('keydown', unlockAudio);
             };
-            window.addEventListener('click', unlockAudio);
-            window.addEventListener('touchstart', unlockAudio);
-            window.addEventListener('keydown', unlockAudio);
+            document.addEventListener('click', primeAudio);
+            document.addEventListener('keydown', primeAudio);
 
-            // Soft chime via Web Audio API
-            function playChime() {
+            function playSound() {
                 try {
-                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    
-                    // If still suspended, we can't play yet
-                    if (audioCtx.state === 'suspended') return;
+                    notifAudio.currentTime = 0;
+                    notifAudio.play().catch(() => {
+                        // Fallback: Web Audio API chime if HTML5 audio fails
+                        try {
+                            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                            const osc = ctx.createOscillator();
+                            const gain = ctx.createGain();
+                            osc.connect(gain); gain.connect(ctx.destination);
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(880, ctx.currentTime);
+                            osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.4);
+                            gain.gain.setValueAtTime(0.4, ctx.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                            osc.start(); osc.stop(ctx.currentTime + 0.5);
+                        } catch(e) {}
+                    });
+                } catch(e) {}
+            }
 
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.4);
-                    gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-                    osc.start(audioCtx.currentTime);
-                    osc.stop(audioCtx.currentTime + 0.5);
-                } catch(e) {
-                    console.error('Chime failed:', e);
-                }
+            // ── Toast popup (like Facebook)
+            function showToast(notification) {
+                const existing = document.getElementById('notifToast');
+                if (existing) existing.remove();
+
+                const toast = document.createElement('div');
+                toast.id = 'notifToast';
+                toast.style.cssText = `
+                    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+                    background: #fff; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+                    padding: 0; min-width: 300px; max-width: 360px;
+                    display: flex; align-items: stretch; overflow: hidden;
+                    border-left: 4px solid #0d6efd; animation: slideInRight 0.35s cubic-bezier(.4,0,.2,1);
+                `;
+                toast.innerHTML = `
+                    <style>
+                        @keyframes slideInRight {
+                            from { transform: translateX(120%); opacity: 0; }
+                            to   { transform: translateX(0);    opacity: 1; }
+                        }
+                        @keyframes slideOutRight {
+                            from { transform: translateX(0);    opacity: 1; }
+                            to   { transform: translateX(120%); opacity: 0; }
+                        }
+                        #notifToast:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.22); }
+                    </style>
+                    <div style="padding: 14px 16px; flex: 1;">
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+                            <span style="background:#e8f0fe; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <i class="bi bi-droplet-fill" style="color:#0d6efd; font-size:1rem;"></i>
+                            </span>
+                            <span style="font-weight:700; font-size:0.85rem; color:#1c1e21;">New Order Received!</span>
+                        </div>
+                        <div style="font-size:0.8rem; color:#444; padding-left:42px; line-height:1.4;">${notification.message}</div>
+                        <div style="font-size:0.7rem; color:#90949c; padding-left:42px; margin-top:4px;"><i class="bi bi-clock me-1"></i>${notification.created_at}</div>
+                    </div>
+                    <button onclick="this.closest('#notifToast').remove()" style="border:none; background:none; padding:8px 12px; color:#90949c; font-size:1.2rem; align-self:flex-start; cursor:pointer;" title="Dismiss">&times;</button>
+                `;
+                document.body.appendChild(toast);
+
+                // Auto-dismiss after 6 seconds
+                setTimeout(() => {
+                    if (toast && toast.parentNode) {
+                        toast.style.animation = 'slideOutRight 0.35s cubic-bezier(.4,0,.2,1) forwards';
+                        setTimeout(() => toast.remove(), 350);
+                    }
+                }, 6000);
             }
 
             function markRead(id, listItem) {
@@ -411,21 +458,19 @@
             }
 
             function renderNotifications(notifications, count) {
-                // update badge
+                // Badge + bell icon
                 if (count > 0) {
                     badge.textContent = count > 99 ? '99+' : count;
                     badge.classList.remove('d-none');
                     bellIcon.classList.add('text-danger');
-                    bellIcon.classList.remove('text-primary'); 
-                    bellIcon.classList.remove('text-muted');
+                    bellIcon.classList.remove('text-primary', 'text-muted');
                 } else {
                     badge.classList.add('d-none');
-                    bellIcon.classList.remove('text-danger');
-                    bellIcon.classList.remove('text-muted');
+                    bellIcon.classList.remove('text-danger', 'text-muted');
                     bellIcon.classList.add('text-primary');
                 }
 
-                // build list
+                // List items
                 notifList.innerHTML = '';
                 if (notifications.length === 0) {
                     notifList.appendChild(emptyMsg.cloneNode(true));
@@ -434,18 +479,21 @@
 
                 notifications.forEach(n => {
                     const li = document.createElement('li');
-                    li.className = 'border-bottom transition-all hover-bg-light';
+                    li.className = 'border-bottom notif-row';
+                    li.style.cssText = 'cursor:pointer; transition: background 0.15s;';
                     li.innerHTML = `
-                        <div class="d-flex align-items-start px-3 py-2 gap-2 notif-item" style="cursor:pointer;" onclick="window.location.href='/home?search=${n.order_id}'">
+                        <div class="d-flex align-items-start px-3 py-2 gap-2">
                             <div class="mt-1 flex-shrink-0">
                                 <span class="badge rounded-circle bg-primary-subtle p-2"><i class="bi bi-droplet-fill text-primary"></i></span>
                             </div>
-                            <div class="flex-grow-1">
-                                <div class="small text-dark fw-bold">${n.message}</div>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <div class="small fw-bold text-dark text-truncate">${n.message}</div>
                                 <div class="text-muted" style="font-size:0.7rem;"><i class="bi bi-clock me-1"></i>${n.created_at}</div>
                             </div>
-                            <button class="btn btn-link btn-sm text-muted p-0 ms-1 flex-shrink-0 mark-read-btn" title="Mark read" data-id="${n.id}"><i class="bi bi-check2"></i></button>
+                            <button class="btn btn-link btn-sm text-success p-0 ms-1 flex-shrink-0 mark-read-btn" title="Mark as read" data-id="${n.id}"><i class="bi bi-check2-all"></i></button>
                         </div>`;
+                    li.addEventListener('mouseenter', () => li.style.background = '#f0f2f5');
+                    li.addEventListener('mouseleave', () => li.style.background = '');
                     li.querySelector('.mark-read-btn').addEventListener('click', e => {
                         e.stopPropagation();
                         markRead(n.id, li);
@@ -456,17 +504,28 @@
 
             function fetchNotifications() {
                 fetch('/notifications', { headers: { 'Accept': 'application/json' } })
-                    .then(r => r.json())
+                    .then(r => {
+                        if (!r.ok) throw new Error('HTTP ' + r.status);
+                        return r.json();
+                    })
                     .then(data => {
                         const newCount = data.count;
-                        // Only chime if count actually increased while user is on the page
+                        const newNotifications = data.notifications;
+
+                        // Trigger sound + toast only when count goes up
                         if (lastCount !== null && newCount > lastCount) {
-                            playChime();
+                            playSound();
+                            // Show toast for each new notification (up to 3)
+                            const numNew = newCount - lastCount;
+                            newNotifications.slice(0, numNew).forEach((n, i) => {
+                                setTimeout(() => showToast(n), i * 300);
+                            });
                         }
+
                         lastCount = newCount;
-                        renderNotifications(data.notifications, newCount);
+                        renderNotifications(newNotifications, newCount);
                     })
-                    .catch(() => {});
+                    .catch(err => console.warn('Notification poll error:', err));
             }
 
             if (markAllBtn) {
@@ -478,10 +537,12 @@
                 });
             }
 
-            // Initial fetch + poll every 3 s for near-instant notifications
+            // Initial fetch then poll every 5 seconds
             fetchNotifications();
-            setInterval(fetchNotifications, 3000);
+            setInterval(fetchNotifications, 5000);
         })();
+
+
 
         // Auto-dismiss success alerts after 5 seconds
         document.addEventListener('DOMContentLoaded', function() {

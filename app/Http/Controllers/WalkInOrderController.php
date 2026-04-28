@@ -9,6 +9,9 @@ use App\Traits\LogsActivity;
 use App\Http\Requests\StoreWalkInRequest;
 use App\Traits\ManagesInventory;
 use App\Models\Setting;
+use App\Models\User;
+use App\Notifications\OrderPlaced;
+use Illuminate\Support\Facades\Notification;
 
 class WalkInOrderController extends Controller
 {
@@ -47,6 +50,15 @@ class WalkInOrderController extends Controller
         ]);
 
         $this->deductOrderStock($order);
+
+        // Notify all admins/managers/directors/staff about the new walk-in order
+        try {
+            $adminRoles = config('roles.admin_roles', ['admin', 'director', 'manager', 'staff']);
+            $admins = User::whereIn('role', $adminRoles)->get();
+            Notification::send($admins, new OrderPlaced($order));
+        } catch (\Throwable $e) {
+            \Log::error('WalkIn OrderPlaced notification failed: ' . $e->getMessage());
+        }
 
         $message = $isImmediate 
             ? 'Walk-in order completed successfully!' 

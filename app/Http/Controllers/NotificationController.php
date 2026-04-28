@@ -21,16 +21,19 @@ class NotificationController extends Controller
             ->latest()
             ->take(20)
             ->get()
-            ->map(fn($n) => [
-                'id'         => $n->id,
-                'message'    => $n->data['message'] ?? 'New notification',
-                'order_id'   => $n->data['order_id'] ?? null,
-                'created_at' => $n->created_at->diffForHumans(),
-            ]);
+            ->map(function($n) {
+                $data = is_array($n->data) ? $n->data : json_decode($n->data, true);
+                return [
+                    'id'         => $n->id,
+                    'message'    => $data['message'] ?? 'New notification received',
+                    'order_id'   => $data['order_id'] ?? null,
+                    'created_at' => $n->created_at->diffForHumans(),
+                ];
+            });
 
         return response()->json([
             'notifications' => $notifications,
-            'count'         => $notifications->count(),
+            'count'         => $user->unreadNotifications()->count(),
         ]);
     }
 

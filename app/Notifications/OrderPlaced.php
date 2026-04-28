@@ -49,6 +49,14 @@ class OrderPlaced extends Notification
      */
     public function toArray(object $notifiable): array
     {
+        return $this->toDatabase($notifiable);
+    }
+
+    /**
+     * Get the database representation of the notification.
+     */
+    public function toDatabase(object $notifiable): array
+    {
         return [
             'order_id'         => $this->order->id,
             'reference_number' => $this->order->reference_number,

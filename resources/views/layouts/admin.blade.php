@@ -356,24 +356,48 @@
             const markAllBtn  = document.getElementById('markAllReadBtn');
             const csrfToken   = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            let lastCount = 0;
+            let lastCount = null; // Changed to null to avoid chime on first load of old notifications
+            let audioCtx = null;
+
+            // Simple user interaction listener to unlock audio
+            const unlockAudio = () => {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                // Once unlocked/resumed, we can remove the listeners
+                window.removeEventListener('click', unlockAudio);
+                window.removeEventListener('touchstart', unlockAudio);
+                window.removeEventListener('keydown', unlockAudio);
+            };
+            window.addEventListener('click', unlockAudio);
+            window.addEventListener('touchstart', unlockAudio);
+            window.addEventListener('keydown', unlockAudio);
 
             // Soft chime via Web Audio API
             function playChime() {
                 try {
-                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
+                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // If still suspended, we can't play yet
+                    if (audioCtx.state === 'suspended') return;
+
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
                     osc.connect(gain);
-                    gain.connect(ctx.destination);
+                    gain.connect(audioCtx.destination);
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(880, ctx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.4);
-                    gain.gain.setValueAtTime(0.4, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-                    osc.start(ctx.currentTime);
-                    osc.stop(ctx.currentTime + 0.5);
-                } catch(e) {}
+                    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.4);
+                    gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.5);
+                } catch(e) {
+                    console.error('Chime failed:', e);
+                }
             }
 
             function markRead(id, listItem) {
@@ -392,11 +416,13 @@
                     badge.textContent = count > 99 ? '99+' : count;
                     badge.classList.remove('d-none');
                     bellIcon.classList.add('text-danger');
+                    bellIcon.classList.remove('text-primary'); 
                     bellIcon.classList.remove('text-muted');
                 } else {
                     badge.classList.add('d-none');
                     bellIcon.classList.remove('text-danger');
-                    bellIcon.classList.add('text-muted');
+                    bellIcon.classList.remove('text-muted');
+                    bellIcon.classList.add('text-primary');
                 }
 
                 // build list
@@ -408,15 +434,15 @@
 
                 notifications.forEach(n => {
                     const li = document.createElement('li');
-                    li.className = 'border-bottom';
+                    li.className = 'border-bottom transition-all hover-bg-light';
                     li.innerHTML = `
-                        <div class="d-flex align-items-start px-3 py-2 gap-2 notif-item" style="cursor:pointer;">
+                        <div class="d-flex align-items-start px-3 py-2 gap-2 notif-item" style="cursor:pointer;" onclick="window.location.href='/home?search=${n.order_id}'">
                             <div class="mt-1 flex-shrink-0">
                                 <span class="badge rounded-circle bg-primary-subtle p-2"><i class="bi bi-droplet-fill text-primary"></i></span>
                             </div>
                             <div class="flex-grow-1">
-                                <div class="small text-dark">${n.message}</div>
-                                <div class="text-muted" style="font-size:0.7rem;">${n.created_at}</div>
+                                <div class="small text-dark fw-bold">${n.message}</div>
+                                <div class="text-muted" style="font-size:0.7rem;"><i class="bi bi-clock me-1"></i>${n.created_at}</div>
                             </div>
                             <button class="btn btn-link btn-sm text-muted p-0 ms-1 flex-shrink-0 mark-read-btn" title="Mark read" data-id="${n.id}"><i class="bi bi-check2"></i></button>
                         </div>`;
@@ -433,7 +459,8 @@
                     .then(r => r.json())
                     .then(data => {
                         const newCount = data.count;
-                        if (newCount > lastCount && lastCount !== null) {
+                        // Only chime if count actually increased while user is on the page
+                        if (lastCount !== null && newCount > lastCount) {
                             playChime();
                         }
                         lastCount = newCount;
